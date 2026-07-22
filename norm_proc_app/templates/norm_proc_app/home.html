@@ -1,0 +1,186 @@
+{% extends "norm_proc_app/base.html" %}
+{% load static %}
+{% block top_bar_page_title %}
+    <h1 class="fs-5 fw-normal m-0 p-0"><i class="bi bi-house-fill"></i> Home</h1>
+{% endblock top_bar_page_title %}
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'norm_proc_app/css/home.css' %}">
+{% endblock css_file %}
+{% block main_content %}
+    <div class="container-fluid p-4">
+        <div class="row bg-white border d-flex justify-content-between rounded p-4">
+            <div class="col-4 border border-1 rounded p-3 me-4">
+                <h3 class="fw-bold fs-5"><i class="bi bi-bar-chart"></i> Estatísticas</h3>
+                <span class="fw-semibold text-muted">Resumo das normas e procedimentos</span>
+                <hr>
+                <div style="width: 370px; height: 310px;">
+                    <div class="card p-3" style="height: 100%;">
+                        <canvas id="patientChart1" style="height: 100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- rascunhos -->
+            <div class="col-7">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold fs-5"><i class="bi bi-pencil"></i> últimos rascunhos</h3>
+                    <a href="" class="btn btn-primary"><i class="bi bi-pencil-square"></i> Adicionar Nova Norma/Procedimento</a>
+                </div>
+                <span class="fw-semibold text-muted">Lista de rascunhos criados.Esta é uma lista de normas e procedimentos que se encontram ainda na fase de criação</span>
+                <hr>
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center border-0 border-bottom">
+                        <div>
+                            <h3 class="fs-5 fw-semibold">An item</h3>
+                        </div>
+                        <a href="" class="btn btn-outline-primary btn-sm">Ver rascunho</a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center border-0 border-bottom">
+                        <div class="fw-semibold">
+                            A second item
+                        </div>
+                        <a href="" class="btn btn-outline-primary btn-sm">Ver rascunho</a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center border-0 border-bottom">
+                        <div class="fw-semibold">
+                            A third item
+                        </div>
+                        <a href="" class="btn btn-outline-primary btn-sm">Ver rascunho</a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center border-0 border-bottom">
+                        <div class="fw-semibold">
+                            A fourth item
+                        </div>
+                        <a href="" class="btn btn-outline-primary btn-sm">Ver rascunho</a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center border-0 border-bottom">
+                        <div class="fw-semibold">
+                            And a fifth one
+                        </div>
+                        <a href="" class="btn btn-outline-primary btn-sm">Ver rascunho</a>
+                    </li>
+                </ul>
+                <br>
+            </div>
+        </div>
+
+        <div class="row mt-5 bg-white border rounded p-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold fs-5"><i class="bi bi-folder-plus"></i> Últimas Atualizações</h3>
+                        <span class="fw-semibold text-muted">últimas normas e procedimentos adicionados</span>
+                    </div>
+                    <a href="" class="btn btn-primary">Ver Todos</a>
+                </div>
+                <hr>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <h5 class="card-title">#345 - Special title treatment</h5>
+                                <p class="card-text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsum repudiandae qui quisquam rem vitae illum delectus consectetur laudantium earum veniam. Quaerat excepturi rem natus itaque non beatae eligendi in similique..</p>
+                                <div class="d-flex justify-content-between border-top rounded p-2 bg-secondary bg-opacity-10">
+                                    <div>
+                                        <small class="fw-bold text-secondary">Criado por: <span class="fw-normal">John Doe - </span></small>
+                                        <small class="fw-bold text-secondary">Criado aos: <span class="fw-normal">2024-06-15 - </span></small>
+                                        <small class="fw-bold text-secondary">Estado:</span> <span class="badge text-success border border-success">Aprovado</small>
+                                    </div>
+                                    <a href="#" class="btn btn-outline-primary btn-sm">Detalhes</a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <h5 class="card-title">#345 - Special title treatment</h5>
+                                <p class="card-text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsum repudiandae qui quisquam rem vitae illum delectus consectetur laudantium earum veniam. Quaerat excepturi rem natus itaque non beatae eligendi in similique..</p>
+                                <div class="d-flex justify-content-between border-top rounded p-2 bg-secondary bg-opacity-10">
+                                    <div>
+                                        <small class="fw-bold text-secondary">Criado por: <span class="fw-normal">John Doe - </span></small>
+                                        <small class="fw-bold text-secondary">Criado aos: <span class="fw-normal">2024-06-15 - </span></small>
+                                        <small class="fw-bold text-secondary">Estado:</span> <span class="badge text-success border border-success">Aprovado</small>
+                                    </div>
+                                    <a href="#" class="btn btn-outline-primary btn-sm">Detalhes</a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <h5 class="card-title">#345 - Special title treatment</h5>
+                                <p class="card-text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsum repudiandae qui quisquam rem vitae illum delectus consectetur laudantium earum veniam. Quaerat excepturi rem natus itaque non beatae eligendi in similique..</p>
+                                <div class="d-flex justify-content-between border-top rounded p-2 bg-secondary bg-opacity-10">
+                                    <div>
+                                        <small class="fw-bold text-secondary">Criado por: <span class="fw-normal">John Doe - </span></small>
+                                        <small class="fw-bold text-secondary">Criado aos: <span class="fw-normal">2024-06-15 - </span></small>
+                                        <small class="fw-bold text-secondary">Estado:</span> <span class="badge text-success border border-success">Aprovado</small>
+                                    </div>
+                                    <a href="#" class="btn btn-outline-primary btn-sm">Detalhes</a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <h5 class="card-title">#345 - Special title treatment</h5>
+                                <p class="card-text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsum repudiandae qui quisquam rem vitae illum delectus consectetur laudantium earum veniam. Quaerat excepturi rem natus itaque non beatae eligendi in similique..</p>
+                                <div class="d-flex justify-content-between border-top rounded p-2 bg-secondary bg-opacity-10">
+                                    <div>
+                                        <small class="fw-bold text-secondary">Criado por: <span class="fw-normal">John Doe - </span></small>
+                                        <small class="fw-bold text-secondary">Criado aos: <span class="fw-normal">2024-06-15 - </span></small>
+                                        <small class="fw-bold text-secondary">Estado:</span> <span class="badge text-success border border-success">Aprovado</small>
+                                    </div>
+                                    <a href="#" class="btn btn-outline-primary btn-sm">Detalhes</a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock main_content %}
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script>
+        const ctx = document.getElementById('patientChart1').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+                datasets: [{
+                    label: 'Patients',
+                    data: [50, 75, 100, 125],
+                    borderColor: 'white',
+                    fill: false,
+                    backgroundColor: ["#5A7ACD", "#85409D", "#4D2B8C", "#000080"],
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        position: 'left'
+                    },
+                    datalabels: {
+                        color: 'black',       // cor do texto
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        formatter: (value, ctx) => {
+                            let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            let percentage = (value / sum * 100).toFixed(1) + "%";
+                            return percentage;
+                        }
+
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock scripts %}

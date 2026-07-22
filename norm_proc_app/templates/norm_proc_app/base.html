@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+    {% block title %}
+        <title>Normas e Procedimentos - Home</title>
+    {% endblock title %}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'norm_proc_files/css/final.css' %}">
+  {% block css_file %}
+  {% endblock css_file %}
+</head>
+<body>
+    <div class="container-fluid">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="d-flex alert {% if message.tags == 'error' %} alert-danger {% else %} alert-{{message.tags}} {% endif %} alert-dismissible fade show position-absolute start-50 translate-middle-x" role="alert" style="top: 3%; z-index: 100">
+                    {{message}}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="row vh-100 vw-100">
+            <!-- Sidebar -->
+            {% if user.is_authenticated %}
+                {% include 'norm_proc_app/sidebar.html' %}
+            {% endif %}
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 m-0 p-0 vh-100 position-relative overflow-auto" id="main-content">
+                <!-- top menu -->        
+                <nav class="d-block d-flex justify-content-between align-items-center position-sticky top-0 px-3 pt-1 pb-2 bg-light w-100 z-3">
+                    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="d-flex align-items-center">
+                        <!-- topr bar page title -->
+                        {% block top_bar_page_title %}
+                        {% endblock top_bar_page_title %}
+                    </div>
+                    <div class="w-50">
+                        <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Digite para pesquisar...">
+                        <datalist id="datalistOptions">
+                            <option value="San Francisco">
+                            <option value="New York">
+                            <option value="Seattle">
+                            <option value="Los Angeles">
+                            <option value="Chicago">
+                        </datalist>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="dropdown">
+                            <span class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="bi bi-bell fs-4"></i>
+                                Notificações
+                            </span>
+                            <ul class="dropdown-menu">
+                                <!-- <li><a class="dropdown-item" href="#">Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'login' %}">Login</a></li> -->
+                            </ul>
+                        </div>
+                        {% if user.is_authenticated %}
+                            <div class="dropdown">
+                                <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">{{request.user.email}}</button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <form action="{% url 'logout' %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" class="dropdown-item" href="">Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                </nav>
+                {% block main_content %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+    {% block backToTopButton %}
+    {% endblock backToTopButton %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Seleciona todos os itens do menu
+        const sidebarItemLink = document.querySelectorAll('.sidebar-item-link');
+        
+        // Função para inicializar o item ativo ao carregar a página
+        function setActiveOnPageLoad() {
+            // Pode usar a URL atual para identificar o menu ativo, por exemplo:
+            const currentURL = window.location.pathname; // Obtém o caminho da URL
+            sidebarItemLink.forEach(item => {
+                // Verifique se o item corresponde à URL
+                if (item.getAttribute('href') === currentURL) {
+                    item.classList.add('active');
+                    item.childNodes[1].className += '-fill'; // Adiciona a classe 'active' ao item correspondente
+                } else {
+                    item.childNodes[1].className.replace('-fill',''); // Adiciona a classe 'active' ao item correspondente
+                    item.classList.remove('active'); 
+                }
+            });
+        }
+
+        // Chama a função ao carregar a página
+        setActiveOnPageLoad();
+    </script>
+    {% block scripts %}
+    {% endblock scripts %}
+</body>
+</html>

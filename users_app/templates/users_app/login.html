@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login page</title>
+  <!-- bootstrap css -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    #login-main-container {
+        background-image: url("{% static 'norm_proc_files/images/pexels-pppsdavid-2684383.jpg' %}");
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    .frase-cascata {
+        transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+        transform: translateY(0);
+    }
+    .frase-cascata.fade-out {
+        opacity: 0;
+        transform: translateY(-15px); /* sobe ao desaparecer */
+    }
+    .frase-cascata.fade-in {
+        opacity: 1;
+        transform: translateY(0); /* volta à posição ao aparecer */
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid p-0 position-absolute h-100 bg-white" id="login-main-container">
+    <!-- info -->
+    <div class="d-flex flex-column justify-content-center position-absolute p-5 top-50 start-0 translate-middle-y w-50 h-100">
+      <div class="position-fixed" style="top: 5%; left: 6.1%">
+        <div class="overflow-hidden" style="width: 5vw; height: 10vh;">
+          <img src="{% static 'norm_proc_files/images/governo-de-angola-logo-com-texto.png' %}" class="mw-100" alt="logo">
+        </div>
+        <h2 class="fs-5 fw-bold">Ministério dos transportes</h2>
+      </div>
+      <div class="text-and-countdown position-relative" style="top: 5%;">
+        <h1 class="fs-4 fw-normal">
+          Bem-vindo(a) ao <br>
+          <span class="fs-1 fw-bold">Portal de Normas <br> e Procedimentos</span>
+        </h1>
+        <!-- <p>
+          Estamos aqui para ajudar. A sua experiência começa com uma boa comunicação — conte conosco para resolver dúvidas, problemas técnicos e solicitações com agilidade e atenção.
+        </p> -->
+        <!-- <p>
+          Faça login para consultar documentos, acompanhar atualizações e garantir alinhamento às melhores práticas.
+        </p> -->
+        <!-- Frase institucional rotativa -->
+        <div id="frase-rotativa" class="fade show text-start fs-5 fw-semibold frase-cascata">
+          <i class="bi bi-shield-check me-2"></i> Normas claras, processos seguros...
+        </div>
+      </div>
+    </div>
+
+    <!-- form -->
+    <div class="form-container position-absolute p-5 top-50 end-0 translate-middle-y w-50 h-100 bg-light">
+      <h2>Login</h2>
+      <br>
+      <!-- <p class="text-muted">
+        Por favor insira o seu E-mail e password, lembre-se de colocar apenas letras minúsculas no campo do E-mail
+      </p>
+      <p class="text-muted">
+        Este sistema é exclusivo para colaboradores autorizados.
+        Ao prosseguir, você concorda com os termos de uso e políticas de privacidade da organização.
+      </p> -->
+      <div class="login-form position-relative" style="top: 15%;">
+        <form method="post" action="{% url 'login' %}">
+          {% csrf_token %}
+          <!-- E-mail -->
+          <div class="form-floating">
+            <input type="text" class="form-control" id="InputEmail" name="email" placeholder="john.doe">
+            <label for="InputEmail" class="text-muted">E-mail</label>
+          </div>
+          <div id="emailHelp" class="form-text mb-3">
+            Por favor, insira apenas letras minúsculas, ex: jonh.doe.
+          </div>
+          <!-- Password -->
+          <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="floatingPassword" name="password" placeholder="Password">
+            <label for="floatingPassword" class="text-muted">Password</label>
+          </div>
+          <!-- lembrar de iniciar sessão sem precisar fazer login de novo -->
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="exampleCheck1">
+            <label class="form-check-label" for="exampleCheck1">Lembrar na próxima sessão</label>
+          </div>
+          <!-- botões -->
+          <button type="submit" class="btn btn-primary">Iniciar sessão</button>
+          <a href="#" class="btn btn-outline-secondary"><i class="bi bi-question-circle"></i> Suporte</a>
+        </form>
+        <br>
+        <small class="text-muted">Em caso de problemas com o início de sessão ou alguma dúvida, por favor clique no botão <span class="p-1 border border-secondary border-1 rounded text-secondary"><i class="bi bi-question-circle"></i> Suporte</span> ou <a href="#">aqui</a> e teremos muito gosto em ajuda-lo</small>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const frases = [
+      {texto: "Normas claras, processos seguros...", icone: "bi-shield-check"},
+      {texto: "Transparência e conformidade em cada etapa...", icone: "bi-eye"},
+      {texto: "Seu guia oficial para práticas padronizadas...", icone: "bi-journal-text"}
+    ];
+
+    let index = 0;
+    const elemento = document.getElementById("frase-rotativa");
+
+    function trocarFrase() {
+      // fade-out + cascata
+      elemento.classList.remove("fade-in");
+      elemento.classList.add("fade-out");
+
+      setTimeout(() => {
+        // troca conteúdo
+        index = (index + 1) % frases.length;
+        elemento.innerHTML = `<i class="bi ${frases[index].icone} me-2"></i> ${frases[index].texto}`;
+
+        // fade-in + cascata
+        elemento.classList.remove("fade-out");
+        elemento.classList.add("fade-in");
+      }, 1000); // tempo do fade-out
+    }
+
+    // alterna a cada 5s
+    setInterval(trocarFrase, 5000);
+  </script>
+</body>
+</html>
