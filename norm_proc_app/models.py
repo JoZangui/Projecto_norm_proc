@@ -7,18 +7,19 @@ from users_app.models import Department
 class BaseDocument(models.Model):
     id = models.UUIDField(primary_key=True, default=generate_sequential_uuid, editable=False)
     title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    # TipTap guarda o conteúdo como JSON estruturado
+    content = models.JSONField(default=dict, blank=True)  
     status = models.CharField(max_length=50, choices=[
-        ('rascunho', 'Rascunho'),
-        ('em_analise', 'Em análise'),
-        ('aprovado', 'Aprovado'),
-        ('revogado', 'Revogado'),
+        ('draft', 'Draft'),
+        ('under_review', 'Under Review'),
+        ('approved', 'Approved'),
+        ('revoked', 'Revoked'),
     ], default='draft')
     file = models.FileField(upload_to='documents/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     published_at = models.DateTimeField(null=True, blank=True)
     revoked_at = models.DateTimeField(null=True, blank=True)
-    current_version = models.CharField(max_length=10, default="1.0")  # agora string tipo "1.0"
+    current_version = models.CharField(max_length=10, default="1.0")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name="versions")
 
@@ -28,8 +29,7 @@ class BaseDocument(models.Model):
     def create_new_version(self, author, major=False):
         """
         Cria uma nova versão do documento.
-        Se major=True → incrementa versão principal (ex.: 1.0 → 2.0).
-        Caso contrário → incrementa versão menor (ex.: 1.0 → 1.1).
+        Att: Isto é apenas para quando for actualizar uma versão existente não quando for criar um novo documento
         """
         major_v, minor_v = map(int, self.current_version.split("."))
         if major:
@@ -41,26 +41,21 @@ class BaseDocument(models.Model):
 
         return self.__class__.objects.create(
             title=self.title,
-            description=self.description,
+            content=self.content,  # copia o JSON do TipTap
             file=self.file,
             current_version=new_version,
             author=author,
             parent=self,
-            status="rascunho"
+            status="draft"
         )
 
 class Norms(BaseDocument):
-    legal_basis = models.TextField(blank=True)
+    legal_basis = models.CharField(default="", blank=True)
     document_type = models.CharField(max_length=100, choices=[
-        ('politica', 'Política'),
-        ('regulamento', 'Regulamento'),
-        ('norma_tecnica', 'Norma técnica'),
+        ('policy', 'Policy'),
+        ('regulation', 'Regulation'),
+        ('technical_standard', 'Technical Standard'),
     ])
-    # O campo "responsible_department" indica qual departamento é responsável pela criação, manutenção e atualização da norma.
-    # Exemplo:
-        # Departamento Jurídico → responsável por normas legais e regulamentos.
-        # Departamento de Qualidade → responsável por normas ISO ou padrões internos.
-        # Esse campo mostra quem tem autoridade sobre o documento e quem deve ser consultado em caso de dúvidas ou revisões.
     responsible_department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
@@ -70,18 +65,13 @@ class Norms(BaseDocument):
         verbose_name_plural = 'Normas'
 
 class Procedures(BaseDocument):
-    steps = models.JSONField(default=list)
+    steps = models.JSONField(default=list)  # podes guardar steps como JSON do TipTap
     estimated_duration = models.DurationField(null=True, blank=True)
     criticality = models.CharField(max_length=50, choices=[
-        ('baixo', 'Baixo'),
-        ('medio', 'Médio'),
-        ('alto', 'Alto'),
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
     ])
-    # O campo "operational_department" Indica quem executa na prática o procedimento operacional.
-    # Exemplo:
-        # Departamento de TI → responsável por procedimentos de backup.
-        # Departamento de RH → responsável por procedimentos de onboarding de funcionários.
-        # Esse campo mostra quem aplica a norma no dia a dia, garantindo que a execução esteja alinhada com a norma correspondente.
     operational_department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):

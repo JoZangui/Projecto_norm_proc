@@ -1,0 +1,135 @@
+{% extends "norm_proc_app/base.html" %}
+{% load static %}
+{% block title %}
+    <title>Nova norma - Normas e Procedimentos</title>
+{% endblock title %}
+{% block main_content %}
+<!-- top state -->
+    <div class="my-2 p-1 bg-body-tertiary rounded" id="top-state">
+        <div class="w-100 py-2 px-4 rounded bg-white">
+            <div class="row">
+                <!-- breadcrumb -->
+                <div class="col-12">
+                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                        <ol class="breadcrumb border-bottom">
+                            {% if norm.author == user %}
+                                <!-- Se o usuário logado é o criador do ticket então volta para a lista de ticket criadas pelo usuário -->
+                                <li class="breadcrumb-item"><a href="#" style="text-decoration: none;">Normas</a></li>
+                                
+                            {% else %}
+                                <!-- Se não, ele volta para lista de tickets atribuidas ao usuário ou a sua equipa se este for admin -->
+                                <li class="breadcrumb-item"><a href="#" style="text-decoration: none;">Normas</a></li>
+                            {% endif %}
+                            <li class="breadcrumb-item active" aria-current="page">Detalhes</li>
+                        </ol>
+                    </nav>
+                </div>
+                <!-- título do ticket -->
+                <div class="col-12">
+                    <h1 class="fs-5 text-dark text-truncate fw-semibold py-2 my-0" title="{{ticket.issue_summary}}" style="max-width: 850px;">{{norm.title}}</h1>
+                </div>
+                <!-- criado por, data de criação e data de entrega -->
+                <div class="col-12 mb-2">
+                    <small class="text-secondary fw-semibold"><i class="bi bi-person"></i> Autor: {{norm.author.first_name}} {{norm.author.last_name}} / {{norm.author.email}} (Departamento do criador) - Responsável ({{norm.responsible_department}}) -</small>
+                    <small class="text-secondary fw-semibold"><i class="bi bi-calendar2-week"></i> Em: {{norm.created_at|date:"d-m-Y, H:i:s"}} </small>
+                    {% comment %}  
+                        {% if norm.author != user %}
+                            <small id="due_date"
+                                data-due-date="{{ ticket.due_date|date:'Y-m-d' }}"
+                                class="fw-semibold">
+                                - <i class="bi bi-hourglass-bottom"></i> Data de entrega: {{ ticket.due_date|date:"d-m-Y, H:i:s" }}
+                                <span class="fw-normal" id="due_status">
+                                </span>
+                            </small>
+                        {% endif %}
+                    {% endcomment %}
+                </div>
+                <!-- Estado, Prioridade e Alertas -->
+                <div class="col-12 overflow-x-auto d-flex flex-row align-items-center gap-2">
+                    <!-- Estado -->
+                    {% if norm.status == "draft" %}
+                        <span class="badge bg-secondary rounded-5 text-white fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
+                    {% elif norm.status == "under_review" %}
+                        <span class="badge border border-warning rounded-5 text-warning fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
+                    {% elif norm.status == "approved" %}
+                        <span class="badge border border-success rounded-5 text-success fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
+                    {% elif norm.status == "revoked" %}
+                        <span class="badge border border-danger rounded-5 text-danger fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
+                    {% endif %}
+                    <!-- Versão actual -->
+                    <span class="badge bg-dark rounded-5 text-white fw-semibold">Versão: <span class="fw-bold">{{norm.current_version}}</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- main content and aside -->
+    <div class="row m-0 p-0">
+        <!-- main -->
+        <div class="col-12 col-lg-9 order-2 order-lg-1 h-100 overflow-hidden p-1 bg-body-tertiary rounded">
+            <div class="d-flex flex-column justify-content-between rounded bg-white py-3 px-5">
+                <!-- descrição do Ticket -->
+                <div class="overflow-y-auto bg-body-tertiary p-3 rounded" style="min-width: 200px; max-height: 500px;">
+                    <h2 class="fs-6 fw-normal border-bottom py-2">
+                        <i class="bi bi-quote"></i> Descrição:
+                    </h2>
+                    <div class="texto mt-3" style="text-align: justify;">
+                        <p class="fw-semibold">
+                            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Architecto voluptatum est illo adipisci maxime, atque ex saepe exercitationem explicabo cum ipsum perspiciatis quia eum, repellendus vero deserunt culpa unde veniam.
+                        </p>
+                    </div>
+                </div>
+                <!-- comentários -->
+                <div class="py-2" style="min-width: 200px">
+                    <div class="container mt-3 mb-4 bg-body-tertiary p-3 rounded my-3" style="max-height: 100%;">
+                        <h2 class="fs-6 fw-normal border-bottom py-2">
+                            <i class="bi bi-chat-square-text"></i> Comentários:
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- aside -->
+        <aside class="col-12 col-lg-3 order-1 order-lg-2 d-flex flex-row flex-lg-column px-0 px-lg-2 overflow-x-auto">
+            <!-- Informações adicionais -->
+            <div class="p-1 bg-body-tertiary my-2 rounded">
+                <!-- Conteúdo do aside -->
+                <div class="bg-white px-4 py-3 rounded h-100">
+                    <h6 class="text-dark fw-normal"><i class="bi bi-info-square-fill"></i> Informações adicionais</h6>
+                    <div class="border-start border-dark mb-2 ps-4">
+                        <ul class="ms-2 list-group list-group-flush" style="max-height: 210px; list-style: none;">
+                            <li class="list-item mb-2">
+                                <span class="text-dark fw-semibold"><i class="bi bi-tags"></i> Categoria:</span><br> {{ticket.help_topic}}
+                            </li>
+                            {% if ticket.updated_at %}
+                                <li class="list-item">
+                                    <span class="text-dark fw-semibold"><i class="bi bi-arrow-clockwise"></i> Última actualização:</span><br> {{ticket.updated_at|date:"d-m-Y, H:i:s"}}
+                                </li>
+                            {% else %}
+                                <li class="list-item">
+                                    <span class="text-dark fw-semibold">Última actualização:</span> {{ticket.created_at|date:"d-m-Y, H:i:s"}}
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="p-1 bg-body-tertiary my-2 rounded">
+                <!-- Conteúdo do aside -->
+                <div class="bg-white px-4 py-3 rounded h-100">
+                    <h6 class="text-dark fw-normal"><i class="bi bi-question-square-fill"></i> Ajuda:</h6>
+                    <div class="card border-0 bg-info mb-3" style="max-width: 18rem;">
+                        <div class="card-body text-white">
+                            <h5 class="card-title fs-6 fw-bolder">Precisa de ajuda?</h5>
+                            <hr class="m-0 border-3">
+                            <p class="card-text fs-6">
+                                Em caso de dúvida ou alguma dificuldade por favor consulte a <strong>página de informação</strong> ou entre em contacto com o <strong>suporte técnico</strong>.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="" class="btn btn-info text-white w-100">Informações Gerais</a>
+                </div>
+            </div>
+        </aside>
+    </div>
+{% endblock main_content %}

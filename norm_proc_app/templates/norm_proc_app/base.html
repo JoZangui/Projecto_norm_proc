@@ -1,93 +1,105 @@
 {% load static %}
-<!DOCTYPE html>
-<html lang="pt">
+<!doctype html>
+<html lang="pt-pt">
 <head>
-  <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block title %}
-        <title>Normas e Procedimentos - Home</title>
+        <title>Normas e Procedimentos</title>
     {% endblock title %}
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'norm_proc_files/css/final.css' %}">
-  {% block css_file %}
-  {% endblock css_file %}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <!-- css locais -->
+    <link rel="stylesheet" href="{% static 'helpdesk/css/sidebar_style.css' %}">
+    <link rel="stylesheet" href="{% static 'helpdesk/css/main_style.css' %}">
+    <link rel="stylesheet" href="{% static 'helpdesk/css/notifications.css' %}">
+    {% block css_file %}
+    {% endblock css_file %}
+    <style>
+        .tooltip-white .tooltip-inner {
+            background-color: #ffffff;
+            color: #000000;
+            border: 1px solid #000000;
+            opacity: 1;
+        }
+        .tooltip-white .tooltip-arrow::before {
+            border-color: #ffffff;
+        }
+    </style>
 </head>
 <body>
-    <div class="container-fluid">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="d-flex alert {% if message.tags == 'error' %} alert-danger {% else %} alert-{{message.tags}} {% endif %} alert-dismissible fade show position-absolute start-50 translate-middle-x" role="alert" style="top: 3%; z-index: 100">
-                    {{message}}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %} alert-danger {% else %} alert-{{message.tags}} {% endif %} alert-dismissible fade show position-absolute start-50 translate-middle-x z-3" role="alert" style="top: 10%;">
+                <strong>{{ message.tags|title }}:</strong> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <!-- top menu -->
+    <nav class="navbar navbar-expand-lg border-bottom position-sticky top-0 w-100">
+        <div class="container-fluid row">
+            <div class="col-4 d-flex align-items-center">
+                <!-- menu button -->
+                <button class="navbar-toggler me-2 border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasResponsive" aria-controls="offcanvasResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="overflow-hidden me-2" style="width: 150px;">
+                    <img class="w-100" src="{% static 'norm_proc_files/images/mintrans_logo_2.png' %}" alt="mintrans logo">
                 </div>
-            {% endfor %}
-        {% endif %}
-        <div class="row vh-100 vw-100">
-            <!-- Sidebar -->
-            {% if user.is_authenticated %}
-                {% include 'norm_proc_app/sidebar.html' %}
-            {% endif %}
-
-            <!-- Main Content -->
-            <div class="col-md-9 col-lg-10 m-0 p-0 vh-100 position-relative overflow-auto" id="main-content">
-                <!-- top menu -->        
-                <nav class="d-block d-flex justify-content-between align-items-center position-sticky top-0 px-3 pt-1 pb-2 bg-light w-100 z-3">
-                    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="d-flex align-items-center">
-                        <!-- topr bar page title -->
-                        {% block top_bar_page_title %}
-                        {% endblock top_bar_page_title %}
-                    </div>
-                    <div class="w-50">
-                        <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Digite para pesquisar...">
-                        <datalist id="datalistOptions">
-                            <option value="San Francisco">
-                            <option value="New York">
-                            <option value="Seattle">
-                            <option value="Los Angeles">
-                            <option value="Chicago">
-                        </datalist>
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="dropdown">
-                            <span class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">
-                                <i class="bi bi-bell fs-4"></i>
-                                Notificações
-                            </span>
-                            <ul class="dropdown-menu">
-                                <!-- <li><a class="dropdown-item" href="#">Profile</a></li>
-                                <li><a class="dropdown-item" href="{% url 'login' %}">Login</a></li> -->
-                            </ul>
-                        </div>
-                        {% if user.is_authenticated %}
-                            <div class="dropdown">
-                                <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">{{request.user.email}}</button>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <form action="{% url 'logout' %}" method="post">
-                                            {% csrf_token %}
-                                            <button type="submit" class="dropdown-item" href="">Logout</button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </div>
-                        {% endif %}
-                    </div>
-                </nav>
-                {% block main_content %}
-                {% endblock %}
+                <div class="d-none d-lg-block ps-3 border-start border-dark">
+                    <span class="fs-6 fw-semibold">Central de Normas e Procedimentos</span>
+                </div>
+            </div>
+            <!-- Aqui vai aparecer o título do ticket quando for oculto ao rolar na página de detalhes do ticket -->
+            <div class="col-5">
+                {% block HiddenTitles  %}
+                {% endblock HiddenTitles  %}
+            </div>
+            <!-- notificações -->
+            <div class="col-3 d-flex justify-content-end">
+                <div class="dropdown">
+                    <span class="btn" id="notification-button">
+                        <i class="bi bi-bell fs-4"></i>
+                    </span>
+                    <span id="notifications-dropdown-menu">
+                    </span>
+                </div>
             </div>
         </div>
+    </nav>
+
+    {% block modal %}
+    {% endblock modal %}
+    <!-- main container (sidebar & main content) -->
+    <div class="container-fluid position-fixed vh-100 p-0 m-0 row">
+        <!-- sidebar menu -->
+        {% include 'norm_proc_app/requisitante_sidebar_2.html' %}
+        <!-- main content -->
+        <main class="col-lg-10 col-md-12 pb-5 overflow-y-auto h-100" id="main-content">
+
+            <!-- conteudo principal -->
+            {% block main_content %}
+            {% endblock main_content %}
+
+            <!-- page footer -->
+            <hr class="w-25 m-auto mt-5 border-secondary">
+            <footer class="w-100 text-center mb-4 p-2">
+                <span class="text-muted">Mintrans - 2026</span>
+            </footer>
+        </main>
     </div>
     {% block backToTopButton %}
     {% endblock backToTopButton %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script>
         // Seleciona todos os itens do menu
         const sidebarItemLink = document.querySelectorAll('.sidebar-item-link');
-        
+
         // Função para inicializar o item ativo ao carregar a página
         function setActiveOnPageLoad() {
             // Pode usar a URL atual para identificar o menu ativo, por exemplo:
@@ -96,16 +108,87 @@
                 // Verifique se o item corresponde à URL
                 if (item.getAttribute('href') === currentURL) {
                     item.classList.add('active');
-                    item.childNodes[1].className += '-fill'; // Adiciona a classe 'active' ao item correspondente
+                    item.classList.add('fw-semibold');
+                    item.classList.remove('fw-normal'); 
+                    item.childNodes[1].className += '-fill'; // Adiciona "-fill" ao item correspondente
                 } else {
-                    item.childNodes[1].className.replace('-fill',''); // Adiciona a classe 'active' ao item correspondente
+                    item.childNodes[1].className.replace('-fill',''); // Remove ao item correspondente
                     item.classList.remove('active'); 
+                    item.classList.remove('fw-semibold'); 
+                    item.classList.add('fw-normal'); 
                 }
             });
         }
 
         // Chama a função ao carregar a página
         setActiveOnPageLoad();
+
+        // Inicializa tooltips Bootstrap para quaisquer elementos que usem data-bs-toggle="tooltip"
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+    <script src="{% static 'helpdesk/js/notifications.js' %}"></script>
+    {# template.html – deve ser incluído depois do bloco de scripts do Django #}
+    {% comment %}  
+        <script>
+            /*
+            Script para inicializar o gerenciador de notificações
+            ---------
+            O gerenciador de notificações é uma classe JavaScript que lida com a exibição, atualização e interação com as notificações do usuário. Ele é configurado usando um objeto de opções que inclui URLs para buscar notificações, marcar como lidas, deletar, etc.
+            ---------
+            */
+            document.addEventListener('DOMContentLoaded', () => {
+                // Inicializa o gerenciador de notificações quando o DOM estiver carregado
+                new NotificationManager({
+                    pollInterval: 30000,
+
+                    /* endpoints simples */
+                    notificationUrl: "{% url 'get_notifications' %}",
+                    allNotificationsUrl: "{% url 'get_all_notifications' %}",
+
+                    /* 
+                    geramos uma URL válida usando o `url` tag e um id “fictício”
+                    (0 ou qualquer outro). depois substituímos esse número pelo
+                    placeholder {id} que a classe usa internamente.
+                    Isto garante que começa sempre por “/…” e usa a roteirização do Django.
+                    */
+                    markAsReadUrl: "{% url 'mark_notification_as_read' '0' %}".replace('0','{id}'),
+                    deleteUrl: "{% url 'delete_notification' '0' %}".replace('0','{id}'),
+
+                    /* outros endpoints que não precisam de id */
+                    markAllAsReadUrl: "{% url 'mark_all_notifications_as_read' %}",
+
+                    /* template de URL de ticket (termina em barra) */
+                    ticketUrlTemplate: "{% url 'ticket_detail' '0' %}".replace(/0\/?$/, '')
+                });
+            });
+        </script>
+    {% endcomment %}
+    <script>
+        let logoutButton = document.getElementById('logout-button');
+        let logoutCancelButton = document.getElementById('logout-cancel-button');
+
+        if (logoutButton) {
+            logoutButton.addEventListener('click', function() {
+                let confirmLogout = document.getElementById('confirm-logout');
+                if (confirmLogout) {
+                    confirmLogout.classList.remove('d-none');
+                    confirmLogout.classList.add('d-flex');
+                }
+            });
+        }
+
+        if (logoutCancelButton) {
+            logoutCancelButton.addEventListener('click', function() {
+                let confirmLogout = document.getElementById('confirm-logout');
+                if (confirmLogout) {
+                    confirmLogout.classList.remove('d-flex');
+                    confirmLogout.classList.add('d-none');
+                }
+            });
+        }
     </script>
     {% block scripts %}
     {% endblock scripts %}

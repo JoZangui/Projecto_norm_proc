@@ -1,7 +1,7 @@
 {% extends "norm_proc_app/base.html" %}
 {% load static %}
 {% block title %}
-    <title>Criar Ticket - Helpdesk</title>
+    <title>Nova norma - Normas e Procedimentos</title>
 {% endblock title %}
 {% block top_bar_page_title %}
     <h2 class="fs-5 fw-bold mb-0 ms-2"><i class="bi bi-file-earmark-medical-fill"></i> Criar nova norma</h2>
@@ -28,7 +28,7 @@
 {% endblock css_file %}
 {% block main_content %}
 <div class="container py-4">
-    <form method="POST" id="ticket-form" class="row justify-content-center">
+    <form method="POST" id="ticket-form" class="row justify-content-center" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="col-lg-10">
             <div class="card border-1 rounded-4">
@@ -55,6 +55,15 @@
                                 <div class="text-danger small mt-1">{{ form.title.errors }}</div>
                             {% endif %}
                             <label for="issueSummaryInput" class="form-label fw-semibold text-muted"> Assunto</label>
+                        </div>
+
+                        
+                        <div class="my-3">
+                            <label for="documentFile" class="form-label fw-semibold ms-2 text-secondary"> Documento</label>
+                            {{ form.file }}
+                            {% if form.file.errors %}
+                            <div class="text-danger small mt-1">{{ form.file.errors }}</div>
+                            {% endif %}
                         </div>
                         
                         
@@ -105,39 +114,40 @@
                             <div class="card-body p-2">
                                 <div class="form-control editor" contenteditable="true" spellcheck="true"></div>
                             </div>
-                            
-                            <!-- Attachments Section -->
-                            <div class="card-footer bg-light border-top p-3">
-                                <label class="form-label fw-semibold mb-2"><i class="bi bi-paperclip me-1"></i>Anexar Ficheiros</label>
-                                <div class="d-flex gap-2 align-items-top">
-                                    <div class="flex-grow-1">
-                                        <input type="file" class="form-control" id="fileInput" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" />
-                                        <small class="form-text text-muted">Imagens, vídeos, PDF, documentos Office, etc.</small>
+                            {% comment %}  
+                                <!-- Attachments Section -->
+                                <div class="card-footer bg-light border-top p-3">
+                                    <label class="form-label fw-semibold mb-2"><i class="bi bi-paperclip me-1"></i>Anexar Ficheiros</label>
+                                    <div class="d-flex gap-2 align-items-top">
+                                        <div class="flex-grow-1">
+                                            <input type="file" class="form-control" id="fileInput" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" />
+                                            <small class="form-text text-muted">Imagens, vídeos, PDF, documentos Office, etc.</small>
+                                        </div>
+                                        <div>
+                                            <button type="button" class="btn btn-outline-success" id="addFileBtn" disabled>
+                                                <i class="bi bi-plus-circle me-1"></i>Adicionar
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-success" id="addFileBtn" disabled>
-                                            <i class="bi bi-plus-circle me-1"></i>Adicionar
-                                        </button>
+                                    
+                                    <div class="mt-3">
+                                        <div id="fileInfo" class="text-muted"></div>
+                                        <div id="fileList" class="list-group mt-2"></div>
                                     </div>
                                 </div>
-                                
-                                <div class="mt-3">
-                                    <div id="fileInfo" class="text-muted"></div>
-                                    <div id="fileList" class="list-group mt-2"></div>
-                                </div>
-                            </div>
+                            {% endcomment %}
                         </div>
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="card-footer bg-light border-top p-4 d-flex justify-content-end gap-2">
-                        <a href="javascript:history.back()" class="btn btn-outline-secondary px-4">
+                        <a href="javascript:history.back()" class="btn btn-outline-danger px-4">
                             <i class="bi bi-x-circle me-1"></i>Cancelar
                         </a>
                         <button class="btn btn-primary px-4" id="salvar_ticket"
                             data-change-url=""
                             data-csrf-token="" type="submit">
-                            <i class="bi bi-save me-1"></i>Salvar Ticket
+                            <i class="bi bi-save me-1"></i>Submeter Norma
                         </button>
                     </div>
                 </div>

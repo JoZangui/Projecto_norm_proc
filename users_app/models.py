@@ -66,6 +66,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     Essa é a definição do modelo de usuário.
     campos:
         - email: campo obrigatório e único.
+        - username: nome de utilizador único.
+        - first_name: primeiro nome do utilizador.
+        - last_name: apelido do utilizador.
         - is_active: controla se o usuário está ativo.
         - is_staff: permite acesso ao admin.
     Configurações especiais:
@@ -83,11 +86,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         Isso informa ao Django que o modelo de usuário padrão foi substituído.
     """
     email = models.EmailField(unique=True)
+    username = models.CharField(max_length=150, unique=True)
+    first_name = models.CharField(max_length=30, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["username"]
 
     # Gerenciador customizado, responsável por criar usuários e superusuários
     objects = CustomUserManager() 

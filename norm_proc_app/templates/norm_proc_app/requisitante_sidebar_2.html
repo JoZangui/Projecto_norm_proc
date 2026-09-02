@@ -1,0 +1,95 @@
+{% load static %}
+<div class="col-lg-2 offcanvas-lg offcanvas-start bg-body-tertiary p-0" tabindex="-1" id="offcanvasResponsive" aria-labelledby="offcanvasResponsiveLabel">
+    <div class="offcanvas-header p-3">
+        <div class="d-flex flex-column">
+            <div class="overflow-hidden me-2" style="width: 150px;">
+                <a class="navbar-brand" href="#">
+                    <img class="w-100" src="{% static 'helpdesk/images/mintrans_logo_2.png' %}" alt="mintrans logo">
+                </a>
+            </div>
+            <div>
+                <span class="fs-6 fw-semibold">Central de Helpdesk</span>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#offcanvasResponsive" aria-label="Close"></button>
+    </div>
+    <div class="sidebar offcanvas-body position-relative d-flex flex-column px-3" style="min-height: calc(100vh - 4rem);">
+        <div class="flex-grow-1 overflow-y-auto pe-2 pt-2 pb-5" style="max-height: calc(100vh - 12rem);">
+            <a class="btn btn-primary fw-semibold shadow-sm m-3" href="#">
+                <i class="bi bi-asterisk"></i>
+                Nova Norma
+            </a>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link sidebar-item-link rounded text-dark" href="#">
+                        <i class="bi bi-house"></i> 
+                        Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link sidebar-item-link rounded text-dark" href="#">
+                        <i class="bi bi-file-earmark-post"></i>
+                        Normas 
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link sidebar-item-link rounded text-dark" href="#">
+                        <i class="bi bi-ui-checks-grid"></i>
+                        Procedimentos 
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link sidebar-item-link rounded text-dark" href="#">
+                        <i class="bi bi-archive"></i>
+                        Arquivos
+                    </a>
+                </li>
+            </ul>
+
+            <ul class="nav flex-column mt-3">
+                <div class="sidebar-heading align-items-center text-muted py-0">
+                    <span><i class="bi bi-question-lg"></i> Suporte e outros</span>
+                </div>
+                <li class="nav-item">
+                    <a class="nav-link sidebar-item-link rounded text-dark" href="#">
+                        <i class="bi bi-file-text"></i>
+                        Normas e Procedimentos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link sidebar-item-link rounded text-dark" href="#">
+                        <i class="bi bi-shield-lock"></i>
+                        Política de Privacidade
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link sidebar-item-link rounded text-dark" href="#">
+                        <i class="bi bi-info-square"></i>
+                        Informações Gerais
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- sidebar footer -->
+        <footer class="w-100 d-flex flex-column position-absolute bottom-0 start-0 p-2 bg-body-tertiary z-3">
+            <div class="d-none flex-column w-100 position-absolute bottom-0 z-2 mx-auto bg-white text-center p-3" id="confirm-logout">
+                <span>Deseja Terminar a sessão!?</span>
+                <form action="#" method="post">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-danger" type="submit">Confirmar</button>
+                    <span class="btn btn-sm btn-outline-secondary" id="logout-cancel-button">Cancel</span>
+                </form>
+            </div>
+            <div class="bg-white p-3 rounded">
+                <div class="d-flex align-items-top">
+                    <i class="bi bi-person-circle fs-3 me-2 text-muted"></i>
+                    <div class="d-flex flex-column overflow-hidden">
+                        <small class="fw-semibold overflow-hidden" style="text-overflow: ellipsis; white-space: nowrap;" title="{{request.user.first_name}} {{request.user.last_name}}">{{request.user.first_name}} {{request.user.last_name}}</small>
+                        <small class="text-muted overflow-hidden" style="text-overflow: ellipsis; white-space: nowrap;" title="joaquim.zangui@mintrans.gov.ao">{{request.user.email}}</small>
+                    </div>
+                </div>
+                <button class="btn btn-sm text-danger text-start mt-2" type="button" id="logout-button"><i class="bi bi-box-arrow-left"></i> Terminar sessão</button>
+            </div>
+        </footer>
+    </div>
+</div>
