@@ -1,0 +1,266 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visualizador de documento</title>
+  <!-- bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <!-- bootstrap icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: sans-serif; background: #e7e7e7; }
+    #toolbar {
+      align-items: center;
+      /* background: #252525; */
+      color: white;
+      padding: 10px;
+      display: flex;
+      gap: 10px;
+      position: sticky;
+      top: 3%;
+      z-index: 2;
+    }
+    #toolbar button, #pageNumber {
+      border: 1px solid #666;
+      background: #3b3b3b;
+      color: white;
+      min-height: 32px;
+      padding: 5px 10px;
+    }
+    #pageNumber { width: 58px; text-align: center; }
+    #pageCount { color: #bbb; }
+    #status { margin-left: auto; color: #bbb; }
+    #viewer {
+      align-items: flex-start;
+      display: flex;
+      justify-content: center;
+      min-height: calc(100vh - 52px);
+      padding: 24px;
+    }
+    #pagesContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin: 0 auto;
+      max-width: 210mm;
+      width: fit-content;
+      transform-origin: top center;
+    }
+    .pageContainer {
+      background: white;
+      box-shadow: 0 2px 12px rgb(0 0 0 / 35%);
+      aspect-ratio: 210 / 297;
+      position: relative;
+      width: 100%;
+    }
+    .pageContainer canvas { display: block; }
+    #textLayer {
+      bottom: 0;
+      left: 0;
+      overflow: hidden;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+    .textLayer span, .textLayer br {
+      color: transparent;
+      cursor: text;
+      position: absolute;
+      transform-origin: 0% 0%;
+      white-space: pre;
+    }
+    .textLayer ::selection { background: rgb(0 100 255 / 35%); }
+    @media (max-width: 600px) {
+      #toolbar { flex-wrap: wrap; }
+      #status { margin-left: 0; width: 100%; }
+      #viewer { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="toolbar" class="container rounded bg-light p-3 shadow-sm">
+    <input id="pageNumber" type="number" min="1" value="1" aria-label="Número da página" class="bg-body-secondary text-dark rounded border-0" title="Buscar página">
+    <span id="pageCount" class="text-dark">/ ...</span> <span class="mx-3 text-secondary"> |</span>
+    <!-- página anterior -->
+    <button id="previousPage" type="button" class="bg-body-secondary text-dark rounded border-0" title="Página anterior">
+      <i class="bi bi-caret-left-square"></i>
+    </button>
+    <!-- próxima página -->
+    <button id="nextPage" type="button" class="bg-body-secondary text-dark rounded border-0" title="Próxima página">
+      <i class="bi bi-caret-right-square-fill"></i>
+    </button>
+    <!-- zoom in -->
+    <button id="zoomIn" type="button" class="bg-body-secondary text-dark rounded border-0" title="Zoom in">
+      <i class="bi bi-zoom-in"></i>
+    </button>
+    <!-- zoom out -->
+    <button id="zoomOut" type="button" class="bg-body-secondary text-dark rounded border-0" title="Zoom out">
+      <i class="bi bi-zoom-out"></i>
+    </button>
+    <button id="fitWidth" type="button" class="bg-body-secondary text-dark rounded border-0" title="Tela cheia">
+      <i class="bi bi-arrows-angle-expand"></i>
+    </button>
+    <button id="resetZoom" type="button" class="bg-body-secondary text-dark rounded border-0" title="Tela normal">
+      <i class="bi bi-arrows-collapse-vertical"></i>
+    </button>
+    <span id="status">A carregar...</span>
+  </div>
+
+  <div id="viewer">
+    <div id="pagesContainer"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="{% static 'vendor/pdfjs/pdf.min.js' %}"></script>
+  <script>
+    // configura o caminho do worker do PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "{% static 'vendor/pdfjs/pdf.worker.min.js' %}";
+
+    // define a URL do PDF a ser carregado
+    // const pdfUrl = "{% get_media_prefix %}documents/Como_o_Linux_funciona.pdf"; // versão antiga
+    const pdfUrl = "{{norm.file.url}}";
+    // define os elementos do DOM
+    const pagesContainer = document.getElementById("pagesContainer");
+    const pageNumber = document.getElementById("pageNumber");
+    const pageCount = document.getElementById("pageCount");
+    const status = document.getElementById("status");
+    let pdfDocument;
+    let currentPage = 1;
+    let zoom = 1.0;
+    const normalZoom = 1.0;
+
+    // define a função para aplicar o zoom
+    function applyZoom() {
+      pagesContainer.style.transform = `scale(${zoom})`;
+      pagesContainer.style.marginBottom = `${(zoom - 1) * pagesContainer.offsetHeight}px`;
+      document.getElementById("status").textContent = `Zoom: ${Math.round(zoom * 100)}%`;
+    }
+
+    function setZoom(value) {
+      zoom = Math.max(0.5, Math.min(3, value));
+      applyZoom();
+    }
+
+    // define a função para ajustar a página à tela
+    function fitToScreen() {
+      const firstPage = window.pageElements?.[0];
+      if (!firstPage) return;
+      const availableWidth = document.getElementById("viewer").clientWidth - 48;
+      const pageWidth = firstPage.offsetWidth;
+      setZoom(availableWidth / pageWidth);
+    }
+
+    function resetZoom() {
+      setZoom(normalZoom);
+    }
+
+    // define a função para renderizar uma página
+    async function renderPage(number, pageContainer, force = false) {
+      // verifica se a página já foi renderizada ou está em processo de renderização
+      if (pageContainer.dataset.rendered === "true" && !force) return;
+      // verifica se a página está em processo de renderização
+      if (pageContainer.dataset.rendering === "true") return;
+      pageContainer.dataset.rendering = "true"; // marca a página como em processo de renderização
+
+      try {
+        const page = await pdfDocument.getPage(number); // obtém a página do documento PDF
+        const viewport = page.getViewport({ scale: 1 }); // obtém o viewport da página com escala 1
+        const deviceScale = window.devicePixelRatio || 1; // obtém a escala do dispositivo para renderização em alta resolução
+        const canvas = pageContainer.querySelector("canvas"); // obtém o elemento canvas da página
+        const canvasContext = canvas.getContext("2d"); // obtém o contexto 2D do canvas
+        const textLayer = pageContainer.querySelector(".textLayer"); // obtém o elemento da camada de texto da página
+
+        canvas.width = viewport.width * deviceScale; // define a largura do canvas em pixels, considerando a escala do dispositivo
+        canvas.height = viewport.height * deviceScale; // define a altura do canvas em pixels, considerando a escala do dispositivo
+        canvas.style.width = `${viewport.width}px`; // define a largura do canvas em CSS pixels
+        canvas.style.height = `${viewport.height}px`; // define a altura do canvas em CSS pixels
+        pageContainer.style.width = `${viewport.width}px`; // define a largura do contêiner da página em CSS pixels
+        pageContainer.style.height = `${viewport.height}px`; // define a altura do contêiner da página em CSS pixels
+        canvasContext.setTransform(deviceScale, 0, 0, deviceScale, 0, 0); // aplica a transformação de escala no contexto do canvas para renderização em alta resolução
+        textLayer.replaceChildren(); // limpa o conteúdo da camada de texto
+        textLayer.style.width = `${viewport.width}px`; // define a largura da camada de texto em CSS pixels
+        textLayer.style.height = `${viewport.height}px`; // define a altura da camada de texto em CSS pixels
+        textLayer.style.setProperty("--scale-factor", 1); // define a variável CSS --scale-factor para a camada de texto
+
+        await page.render({ canvasContext, viewport }).promise; // renderiza a página no canvas
+        const textContent = await page.getTextContent(); // obtém o conteúdo de texto da página
+        // renderiza a camada de texto da página
+        await pdfjsLib.renderTextLayer({
+          textContentSource: textContent,
+          container: textLayer,
+          viewport
+        }).promise;
+        pageContainer.dataset.rendered = "true"; // marca a página como renderizada
+      } finally {
+        pageContainer.dataset.rendering = "false"; // marca a página como não em processo de renderização
+      }
+    }
+
+    // define a função para renderizar todas as páginas do documento
+    async function renderAllPages() {
+      pagesContainer.replaceChildren(); // limpa o contêiner de páginas
+      status.textContent = "A preparar páginas..."; // atualiza o status para indicar que as páginas estão sendo preparadas
+      const pageElements = []; // cria um array para armazenar os elementos de contêiner das páginas
+
+      // cria os elementos de contêiner para cada página do documento PDF
+      for (let number = 1; number <= pdfDocument.numPages; number += 1) {
+        const pageContainer = document.createElement("div");
+        pageContainer.className = "pageContainer";
+        pageContainer.dataset.pageNumber = number;
+        pageContainer.innerHTML = '<canvas></canvas><div class="textLayer"></div>';
+        pagesContainer.appendChild(pageContainer);
+        pageElements.push(pageContainer);
+      }
+      window.pageElements = pageElements; // armazena os elementos de contêiner das páginas no objeto global window para acesso posterior
+      window.pageObserver?.disconnect(); // desconecta o observador de interseção anterior, se existir
+      // cria um novo observador de interseção para renderizar as páginas quando elas estiverem visíveis na tela
+      window.pageObserver = new IntersectionObserver((entries) => {
+        entries.filter((entry) => entry.isIntersecting).forEach((entry) => {
+          const element = entry.target;
+          renderPage(Number(element.dataset.pageNumber), element).catch(showError);
+        });
+      }, { rootMargin: "1000px" });
+      pageElements.forEach((element) => window.pageObserver.observe(element));
+      await renderPage(1, pageElements[0]);
+      status.textContent = "Pronto";
+      goToPage(currentPage);
+    }
+
+    function goToPage(number) {
+      if (!pdfDocument || !window.pageElements) return;
+      currentPage = Math.max(1, Math.min(pdfDocument.numPages, number));
+      pageNumber.value = currentPage;
+      const element = window.pageElements[currentPage - 1];
+      renderPage(currentPage, element).catch(showError);
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function showError(error) {
+      console.error(error);
+      status.textContent = "Não foi possível carregar o documento.";
+    }
+
+    document.getElementById("previousPage").addEventListener("click", () => goToPage(currentPage - 1));
+    document.getElementById("nextPage").addEventListener("click", () => goToPage(currentPage + 1));
+    document.getElementById("zoomIn").addEventListener("click", () => {
+      setZoom(zoom + 0.2);
+    });
+    document.getElementById("zoomOut").addEventListener("click", () => {
+      setZoom(zoom - 0.2);
+    });
+    document.getElementById("fitWidth").addEventListener("click", fitToScreen);
+    document.getElementById("resetZoom").addEventListener("click", resetZoom);
+    pageNumber.addEventListener("change", () => goToPage(Number(pageNumber.value)));
+
+    pdfjsLib.getDocument(pdfUrl).promise.then((document) => {
+      pdfDocument = document;
+      pageCount.textContent = `/ ${document.numPages}`;
+      return renderAllPages();
+    }).catch(showError);
+  </script>
+</body>
+</html>

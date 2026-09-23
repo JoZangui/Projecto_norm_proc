@@ -1,8 +1,42 @@
 {% extends "norm_proc_app/base.html" %}
 {% load static %}
+{% load group_tags %}
 {% block title %}
     <title>Nova norma - Normas e Procedimentos</title>
 {% endblock title %}
+{% block css_file %}
+    <style>
+        #pagesContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .pageContainer {
+            position: relative;
+            background: white;
+        }
+
+        .pageContainer canvas {
+            display: block;
+        }
+
+        .textLayer {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .textLayer span,
+        .textLayer br {
+            position: absolute;
+            color: transparent;
+            white-space: pre;
+            transform-origin: 0% 0%;
+        }
+    </style>
+{% endblock css_file %}
 {% block main_content %}
 <!-- top state -->
     <div class="my-2 p-1 bg-body-tertiary rounded" id="top-state">
@@ -30,7 +64,7 @@
                 </div>
                 <!-- criado por, data de criação e data de entrega -->
                 <div class="col-12 mb-2">
-                    <small class="text-secondary fw-semibold"><i class="bi bi-person"></i> Autor: {{norm.author.first_name}} {{norm.author.last_name}} / {{norm.author.email}} (Departamento do criador) - Responsável ({{norm.responsible_department}}) -</small>
+                    <small class="text-secondary fw-semibold"><i class="bi bi-person"></i> Autor: {{norm.author}} / Responsável ({{norm.responsible_department}}) -</small>
                     <small class="text-secondary fw-semibold"><i class="bi bi-calendar2-week"></i> Em: {{norm.created_at|date:"d-m-Y, H:i:s"}} </small>
                     {% comment %}  
                         {% if norm.author != user %}
@@ -44,13 +78,15 @@
                         {% endif %}
                     {% endcomment %}
                 </div>
-                <!-- Estado, Prioridade e Alertas -->
+                <!-- Estado, Versão e Nível de classificação -->
                 <div class="col-12 overflow-x-auto d-flex flex-row align-items-center gap-2">
                     <!-- Estado -->
                     {% if norm.status == "draft" %}
-                        <span class="badge bg-secondary rounded-5 text-white fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
+                        <span id="norm-status" class="badge bg-secondary rounded-5 text-white fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
                     {% elif norm.status == "under_review" %}
-                        <span class="badge border border-warning rounded-5 text-warning fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
+                        <span id="norm-status" class="badge border border-warning rounded-5 text-warning fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
+                    {% elif norm.status == "pending_approval" %}
+                        <span class="badge border border-primary rounded-5 text-primary fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
                     {% elif norm.status == "approved" %}
                         <span class="badge border border-success rounded-5 text-success fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
                     {% elif norm.status == "revoked" %}
@@ -58,6 +94,14 @@
                     {% endif %}
                     <!-- Versão actual -->
                     <span class="badge bg-dark rounded-5 text-white fw-semibold">Versão: <span class="fw-bold">{{norm.current_version}}</span></span>
+                    <!-- Nível de classificação -->
+                     {% if norm.Classification_level == "public" %}
+                        <span class="badge bg-success rounded-5 text-white fw-semibold">Nível de classificação: <span class="fw-bold">{{norm.Classification_level}}</span></span>
+                    {% elif norm.Classification_level == "internal" %}
+                        <span class="badge bg-warning rounded-5 text-dark fw-semibold">Nível de classificação: <span class="fw-bold">{{norm.Classification_level}}</span></span>
+                    {% elif norm.Classification_level == "confidential" %}
+                        <span class="badge bg-danger rounded-5 text-white fw-semibold">Nível de classificação: <span class="fw-bold">{{norm.Classification_level}}</span></span>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -79,13 +123,46 @@
                         </p>
                     </div>
                 </div>
-                <!-- comentários -->
+                <!-- Documento -->
                 <div class="py-2" style="min-width: 200px">
-                    <div class="container mt-3 mb-4 bg-body-tertiary p-3 rounded my-3" style="max-height: 100%;">
+                    <div class="container mt-3 mb-4 bg-body-tertiary py-3 px-2 rounded my-3 position-relative" style="max-height: 100%;">
                         <h2 class="fs-6 fw-normal border-bottom py-2">
-                            <i class="bi bi-chat-square-text"></i> Comentários:
+                            <i class="bi bi-file-slides-fill"></i> Previsualização do Documento:
                         </h2>
+
+                        <!-- visualizador -->
+                        <div id="viewer" class="overflow-y-auto p-5" style="height: 300px;">
+                            <div id="pagesContainer"></div>
+                        </div>
+
+                        <div class="w-50 btn-group position-absolute shadow-lg" style="left: 30%; bottom: 5%;">
+                            <!-- Abrir o documento -->
+                            <a href="{% url 'norm_proc_app:viewer' norm.pk %}" target="_blank" class="btn btn-light border"><i class="bi bi-file-earmark"></i> Abrir documento</a>
+                            
+                            <!-- Baixar o documento -->
+                            <a href="" class="btn btn-light border"><i class="bi bi-download"></i> Baixar documento</a>
+                        </div>
                     </div>
+                    <!-- <div class="btn-group" role="group" aria-label="Default button group">
+                        <button type="button" class="btn btn-outline-primary">Left</button>
+                        <button type="button" class="btn btn-outline-primary">Middle</button>
+                        <button type="button" class="btn btn-outline-primary">Right</button>
+                    </div> -->
+                    {% if user.is_authenticated %}  
+                        {% if norm.status == "draft" and user|has_group:"Autor" %}
+                            <div class="w-100 d-flex flex-row justify-content-end gap-2 py-3">
+                                <a href="{% url 'norm_proc_app:submit_norm_for_review' norm.pk %}" id="submit-for-review" class="btn btn-dark"><i class="bi bi-send"></i> Submeter para revisão</a>
+                            </div>
+                        {% elif norm.status == "under_review" and user|has_group:"Revisor" %}
+                            <div class="w-100 d-flex flex-row justify-content-end gap-2 py-3">
+                                <a href="{% url 'norm_proc_app:submit_norm_for_approval' norm.pk %}" id="submit-for-approval" class="btn btn-dark"><i class="bi bi-send"></i> Submeter para Aprovação</a>
+                            </div>
+                        {% elif norm.status == "under_approval" and user|has_group:"Aprovador" %}
+                            <div class="w-100 d-flex flex-row justify-content-end gap-2 py-3">
+                                <a href="{% url 'norm_proc_app:approve_norm' norm.pk %}" id="approve-norm" class="btn btn-dark"><i class="bi bi-send"></i> Aprovar</a>
+                            </div>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -95,12 +172,31 @@
             <div class="p-1 bg-body-tertiary my-2 rounded">
                 <!-- Conteúdo do aside -->
                 <div class="bg-white px-4 py-3 rounded h-100">
-                    <h6 class="text-dark fw-normal"><i class="bi bi-info-square-fill"></i> Informações adicionais</h6>
+                    <h6 class="text-dark fw-normal"><i class="bi bi-pen-fill"></i> Elaborado por:</h6>
                     <div class="border-start border-dark mb-2 ps-4">
-                        <ul class="ms-2 list-group list-group-flush" style="max-height: 210px; list-style: none;">
-                            <li class="list-item mb-2">
-                                <span class="text-dark fw-semibold"><i class="bi bi-tags"></i> Categoria:</span><br> {{ticket.help_topic}}
-                            </li>
+                        <span class="fw-semibold">{{norm.drafted_by.first_name}} {{norm.drafted_by.last_name}}</span><br>
+                        <small class="text-muted">{{norm.drafted_by.email}}</small>
+                    </div>
+
+                    <!-- revisado por -->
+                    {% if norm.reviewed_by %}  
+                        <h6 class="text-dark fw-normal"><i class="bi bi-clipboard-check-fill"></i> Revisado por:</h6> 
+                        <div class="border-start border-dark mb-2 ps-4">
+                            <span class="fw-semibold">{{norm.reviewed_by.first_name}} {{norm.reviewed_by.last_name}}</span><br>
+                            <small class="text-muted">{{norm.reviewed_by.email}}</small>
+                        </div>
+                    {% endif %}
+
+                    <!-- aprovado por -->
+                    {% if norm.approved_by %}
+                        <h6 class="text-dark fw-normal"><i class="bi bi-patch-check-fill"></i> Aprovado por:</h6> 
+                        <div class="border-start border-dark mb-2 ps-4">
+                            <span class="fw-semibold">{{norm.approved_by.first_name}} {{norm.approved_by.last_name}}</span><br>
+                            <small class="text-muted">{{norm.approved_by.email}}</small>
+                        </div>
+                    {% endif %}
+                    <ul class="ms-2 list-group list-group-flush" style="max-height: 210px; list-style: none;">
+                        {% comment %}  
                             {% if ticket.updated_at %}
                                 <li class="list-item">
                                     <span class="text-dark fw-semibold"><i class="bi bi-arrow-clockwise"></i> Última actualização:</span><br> {{ticket.updated_at|date:"d-m-Y, H:i:s"}}
@@ -110,11 +206,22 @@
                                     <span class="text-dark fw-semibold">Última actualização:</span> {{ticket.created_at|date:"d-m-Y, H:i:s"}}
                                 </li>
                             {% endif %}
-                        </ul>
+                        {% endcomment %}
+                    </ul>
+                </div>
+            </div>
+            <!-- Informações adicionais -->
+            <div class="p-1 bg-body-tertiary my-2 rounded">
+                <!-- Conteúdo do aside -->
+                <div class="bg-white px-4 py-3 rounded h-100">
+                    <h6 class="text-dark fw-normal"><i class="bi bi-calendar-fill"></i> Próxima revisão:</h6> 
+                    <div class="border-start border-dark mb-2 ps-4">
+                        <span class="fw-semibold">{{norm.next_review_date|date:"d-m-Y"}}</span>
                     </div>
                 </div>
             </div>
-            <div class="p-1 bg-body-tertiary my-2 rounded">
+            {% comment %}
+                <div class="p-1 bg-body-tertiary my-2 rounded">
                 <!-- Conteúdo do aside -->
                 <div class="bg-white px-4 py-3 rounded h-100">
                     <h6 class="text-dark fw-normal"><i class="bi bi-question-square-fill"></i> Ajuda:</h6>
@@ -129,7 +236,114 @@
                     </div>
                     <a href="" class="btn btn-info text-white w-100">Informações Gerais</a>
                 </div>
-            </div>
+                </div>
+            {% endcomment %}
         </aside>
     </div>
 {% endblock main_content %}
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="{% static 'vendor/pdfjs/pdf.min.js' %}"></script>
+  <script src="{% static 'norm_proc_files/js/submitForReview.js' %}"></script>
+  <script>
+    // configura o caminho do worker do PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "{% static 'vendor/pdfjs/pdf.worker.min.js' %}";
+
+    // define a URL do PDF a ser carregado
+    const pdfUrl = "{% get_media_prefix %}documents/Como_o_Linux_funciona.pdf";
+    // define os elementos do DOM
+    const pagesContainer = document.getElementById("pagesContainer");
+    let pdfDocument;
+    let currentPage = 1;
+
+    // define a função para renderizar uma página
+    async function renderPage(number, pageContainer, force = false) {
+      // verifica se a página já foi renderizada ou está em processo de renderização
+      if (pageContainer.dataset.rendered === "true" && !force) return;
+      // verifica se a página está em processo de renderização
+      if (pageContainer.dataset.rendering === "true") return;
+      pageContainer.dataset.rendering = "true"; // marca a página como em processo de renderização
+
+      try {
+        const page = await pdfDocument.getPage(number); // obtém a página do documento PDF
+        const viewport = page.getViewport({ scale: 1 }); // obtém o viewport da página com escala 1
+        const deviceScale = window.devicePixelRatio || 1; // obtém a escala do dispositivo para renderização em alta resolução
+        const canvas = pageContainer.querySelector("canvas"); // obtém o elemento canvas da página
+        const canvasContext = canvas.getContext("2d"); // obtém o contexto 2D do canvas
+        const textLayer = pageContainer.querySelector(".textLayer"); // obtém o elemento da camada de texto da página
+
+        canvas.width = viewport.width * deviceScale; // define a largura do canvas em pixels, considerando a escala do dispositivo
+        canvas.height = viewport.height * deviceScale; // define a altura do canvas em pixels, considerando a escala do dispositivo
+        canvas.style.width = `${viewport.width}px`; // define a largura do canvas em CSS pixels
+        canvas.style.height = `${viewport.height}px`; // define a altura do canvas em CSS pixels
+        pageContainer.style.width = `${viewport.width}px`; // define a largura do contêiner da página em CSS pixels
+        pageContainer.style.height = `${viewport.height}px`; // define a altura do contêiner da página em CSS pixels
+        canvasContext.setTransform(deviceScale, 0, 0, deviceScale, 0, 0); // aplica a transformação de escala no contexto do canvas para renderização em alta resolução
+        textLayer.replaceChildren(); // limpa o conteúdo da camada de texto
+        textLayer.style.width = `${viewport.width}px`; // define a largura da camada de texto em CSS pixels
+        textLayer.style.height = `${viewport.height}px`; // define a altura da camada de texto em CSS pixels
+        textLayer.style.setProperty("--scale-factor", 1); // define a variável CSS --scale-factor para a camada de texto
+
+                const textContentPromise = page.getTextContent(); // obtém o conteúdo de texto em paralelo com o canvas
+                const canvasRenderPromise = page.render({ canvasContext, viewport }).promise; // renderiza a página no canvas
+                const textContent = await textContentPromise;
+                // renderiza a camada de texto enquanto o canvas termina
+                const textLayerRenderPromise = pdfjsLib.renderTextLayer({
+                    textContentSource: textContent,
+                    container: textLayer,
+                    viewport
+                }).promise;
+                await Promise.all([canvasRenderPromise, textLayerRenderPromise]);
+        pageContainer.dataset.rendered = "true"; // marca a página como renderizada
+      } finally {
+        pageContainer.dataset.rendering = "false"; // marca a página como não em processo de renderização
+      }
+    }
+
+    // define a função para renderizar todas as páginas do documento
+    async function renderAllPages() {
+      pagesContainer.replaceChildren(); // limpa o contêiner de páginas
+      const pageElements = []; // cria um array para armazenar os elementos de contêiner das páginas
+
+      // cria os elementos de contêiner para cada página do documento PDF
+      for (let number = 1; number <= 7; number += 1) {
+        const pageContainer = document.createElement("div");
+        pageContainer.className = "pageContainer";
+        pageContainer.dataset.pageNumber = number;
+        pageContainer.innerHTML = '<canvas></canvas><div class="textLayer"></div>';
+        pagesContainer.appendChild(pageContainer);
+        pageElements.push(pageContainer);
+      }
+      window.pageElements = pageElements; // armazena os elementos de contêiner das páginas no objeto global window para acesso posterior
+      window.pageObserver?.disconnect(); // desconecta o observador de interseção anterior, se existir
+      // cria um novo observador de interseção para renderizar as páginas quando elas estiverem visíveis na tela
+      window.pageObserver = new IntersectionObserver((entries) => {
+        entries.filter((entry) => entry.isIntersecting).forEach((entry) => {
+          const element = entry.target;
+          renderPage(Number(element.dataset.pageNumber), element).catch(showError);
+        });
+      }, { rootMargin: "1000px" });
+      pageElements.forEach((element) => window.pageObserver.observe(element));
+      await renderPage(1, pageElements[0]);
+      goToPage(currentPage);
+    }
+
+    function goToPage(number) {
+      if (!pdfDocument || !window.pageElements) return;
+      currentPage = Math.max(1, Math.min(pdfDocument.numPages, number));
+      const element = window.pageElements[currentPage - 1];
+      renderPage(currentPage, element).catch(showError);
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function showError(error) {
+      console.error(error);
+    }
+
+    // carrega o documento PDF e renderiza todas as páginas
+    pdfjsLib.getDocument(pdfUrl).promise.then((document) => {
+      pdfDocument = document;
+      return renderAllPages();
+    }).catch(showError);
+  </script>
+{% endblock scripts %}

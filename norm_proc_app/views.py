@@ -1,10 +1,11 @@
 import logging
 
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 
 from .models import Norms
 from .forms import NormForm
@@ -12,10 +13,6 @@ from .forms import NormForm
 @login_required
 def home(request):
     return render(request, 'norm_proc_app/home.html')
-
-@login_required
-def create_new_request(request):
-    return render(request, 'norm_proc_app/create_new_request.html')
 
 @login_required
 def create_procedure(request):
@@ -49,11 +46,60 @@ def create_norm(request):
 
 @login_required
 def norm_details(request, norm_id):
-    # return HttpResponse(f"Norm details page for norm_id: {norm_id} - to be implemented")
-
-    norm = Norms.objects.get(id=norm_id)
+    norm = get_object_or_404(Norms, id=norm_id)
     return render(request, 'norm_proc_app/norm_details.html', {"norm": norm});
+
+@login_required
+@require_POST
+def submit_norm_for_review(request, norm_id):
+    norm = get_object_or_404(Norms, id=norm_id)
+
+    if norm.status != "draft":
+        return JsonResponse(
+            {"error": "A norma já não está em estado de rascunho."},
+            status=400,
+        )
+
+    norm.status = "under_review"
+    norm.save(update_fields=["status"])
+    return JsonResponse({"status": norm.status})
+
+@login_required
+@require_POST
+def submit_norm_for_approval(request, norm_id):
+    norm = get_object_or_404(Norms, id=norm_id)
+
+    if norm.status != "under_review":
+        return JsonResponse(
+            {"error": "A norma não está em estado de revisão."},
+            status=400,
+        )
+
+    norm.status = "pending_approval"
+    norm.save(update_fields=["status"])
+    return JsonResponse({"status": norm.status})
+
+
+@login_required
+@require_POST
+def approve_norm(request, norm_id):
+    norm = get_object_or_404(Norms, id=norm_id)
+
+    if norm.status != "pending_approval":
+        return JsonResponse(
+            {"error": "A norma não está em estado de aprovação."},
+            status=400,
+        )
+
+    norm.status = "approved"
+    norm.save(update_fields=["status"])
+    return JsonResponse({"status": norm.status})
 
 @login_required
 def procedure_details(request, procedure_id):
     return HttpResponse(f"Procedure details page for procedure_id: {procedure_id} - to be implemented")
+
+@login_required
+def viewer(request, id):
+    norm = Norms.objects.get(id=id)
+    return render(request, "norm_proc_app/viewer.html", {"norm": norm})

@@ -31,6 +31,31 @@ class Department(models.Model):
     class Meta:
         verbose_name_plural = 'Departamentos'
 
+
+class Division(models.Model):
+    """
+    Modelo para divisões (
+        áreas. ex: Área de Segurança da Informação, Área de Operações, Área de Comunicação, Área de Reporting, etc.
+    )
+    Representa uma divisão dentro da organização.
+    Cada divisão pode ter seus próprios departamentos e usuários.
+    Fields:
+        - department: Referência ao departamento ao qual a divisão pertence.
+        - name: Nome da divisão.
+        - acronym: Sigla da divisão.
+    """
+
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='divisions')
+    name = models.CharField(max_length=100)
+    acronym = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.acronym
+    
+    class Meta:
+        verbose_name_plural = 'Divisões'
+
+
 class CustomUserManager(BaseUserManager):
     """
     Essa classe define como criar usuários e superusuários
@@ -149,7 +174,7 @@ class Profile(models.Model):
     id = models.UUIDField(primary_key=True, default=generate_sequential_uuid, editable=False)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     subsidiary = models.ForeignKey(Subsidiary, on_delete=models.PROTECT)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
+    division = models.ForeignKey(Division, on_delete=models.SET_NULL, blank=True, null=True)
     role = models.CharField(max_length=50, choices=[
         ('reader', 'Reader'),
         ('editor', 'Editor'),

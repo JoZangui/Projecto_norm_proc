@@ -68,7 +68,7 @@
         Ao prosseguir, você concorda com os termos de uso e políticas de privacidade da organização.
       </p> -->
       <div class="login-form position-relative" style="top: 15%;">
-        <form method="post" action="{% url 'login' %}">
+        <form method="post" action="{% url 'users_app:login' %}">
           {% csrf_token %}
           <!-- E-mail -->
           <div class="form-floating">

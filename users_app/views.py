@@ -119,12 +119,12 @@ def user_login(request):
             messages.error(request, "E-mail inválido.")
             return render(request, 'users_app/login.html')
 
-        domain = email.split("@")[-1].lower()
+        # domain = email.split("@")[-1].lower()
 
-        trusted_domains = get_trusted_domains()
-        if domain not in trusted_domains:
-            messages.error(request, f"Domínio '{domain}' não está autorizado para autenticação federada.")
-            return render(request, 'users_app/login.html')
+        # trusted_domains = get_trusted_domains()
+        # if domain not in trusted_domains:
+        #     messages.error(request, f"Domínio '{domain}' não está autorizado para autenticação federada.")
+        #     return render(request, 'users_app/login.html')
 
         email = request.POST["email"]
         password = request.POST["password"]
@@ -132,7 +132,8 @@ def user_login(request):
         user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home')
+            print(f"User {user.email} logged in successfully.")
+            return redirect('norm_proc_app:home')
         else:
             messages.error(request, "Credenciais inválidas.")
             return render(request, 'users_app/login.html')
