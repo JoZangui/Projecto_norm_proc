@@ -22,6 +22,7 @@ class BaseDocument(models.Model):
         ('publico', 'Público'),
         ('interno', 'Interno'),
         ('confidencial', 'Confidencial'),
+        ('restrito', 'Restrito'),
     ], default='interno')
     created_at = models.DateTimeField(auto_now_add=True)
     published_at = models.DateTimeField(null=True, blank=True)

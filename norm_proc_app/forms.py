@@ -8,7 +8,7 @@ User = get_user_model()
 class NormForm(ModelForm):
     class Meta:
         model = Norms
-        fields = ['title', 'file', 'content', 'document_type', 'responsible_department']
+        fields = ['title', 'file', 'Description', 'document_type', 'responsible_department']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'file': forms.FileInput(attrs={'class': 'form-control', 'type': 'file', 'id': 'documentFile'}),
@@ -20,7 +20,7 @@ class NormForm(ModelForm):
 class ProcedureForm(ModelForm):
     class Meta:
         model = Procedures
-        fields = ['title', 'content', 'steps', 'status']
+        fields = ['title', 'Description', 'steps', 'status']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),

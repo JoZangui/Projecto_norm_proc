@@ -12,7 +12,8 @@ from .forms import NormForm
 
 @login_required
 def home(request):
-    return render(request, 'norm_proc_app/home.html')
+    norms = Norms.objects.all()
+    return render(request, 'norm_proc_app/home.html', {'norms': norms})
 
 @login_required
 def create_procedure(request):

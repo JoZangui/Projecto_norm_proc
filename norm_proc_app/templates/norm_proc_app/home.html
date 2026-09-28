@@ -73,71 +73,25 @@
                     <a href="" class="btn btn-primary">Ver Todos</a>
                 </div>
                 <hr>
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <div class="card border-0">
-                            <div class="card-body">
-                                <h5 class="card-title">#345 - Special title treatment</h5>
-                                <p class="card-text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsum repudiandae qui quisquam rem vitae illum delectus consectetur laudantium earum veniam. Quaerat excepturi rem natus itaque non beatae eligendi in similique..</p>
-                                <div class="d-flex justify-content-between border-top rounded p-2 bg-secondary bg-opacity-10">
-                                    <div>
-                                        <small class="fw-bold text-secondary">Criado por: <span class="fw-normal">John Doe - </span></small>
-                                        <small class="fw-bold text-secondary">Criado aos: <span class="fw-normal">2024-06-15 - </span></small>
-                                        <small class="fw-bold text-secondary">Estado:</span> <span class="badge text-success border border-success">Aprovado</small>
+                <ul class="list-group border overflow-auto" style="max-height: 400px;">
+                    {% for norm in norms %}
+                        <li class="list-group-item">
+                            <div class="card border-0">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ norm.id }} - {{ norm.title }}</h5>
+                                    <p class="card-text">{{ norm.Description }}</p>
+                                    <div class="d-flex justify-content-between border-top rounded p-2 bg-secondary bg-opacity-10">
+                                        <div>
+                                            <small class="fw-bold text-secondary">Criado por: <span class="fw-normal">John Doe - </span></small>
+                                            <small class="fw-bold text-secondary">Criado aos: <span class="fw-normal">2024-06-15 - </span></small>
+                                            <small class="fw-bold text-secondary">Estado:</span> <span class="badge text-success border border-success">Aprovado</small>
+                                        </div>
+                                        <a href="{% url 'norm_proc_app:norm_details' norm.id %}" class="btn btn-outline-primary btn-sm">Detalhes</a>
                                     </div>
-                                    <a href="#" class="btn btn-outline-primary btn-sm">Detalhes</a>
                                 </div>
                             </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item">
-                        <div class="card border-0">
-                            <div class="card-body">
-                                <h5 class="card-title">#345 - Special title treatment</h5>
-                                <p class="card-text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsum repudiandae qui quisquam rem vitae illum delectus consectetur laudantium earum veniam. Quaerat excepturi rem natus itaque non beatae eligendi in similique..</p>
-                                <div class="d-flex justify-content-between border-top rounded p-2 bg-secondary bg-opacity-10">
-                                    <div>
-                                        <small class="fw-bold text-secondary">Criado por: <span class="fw-normal">John Doe - </span></small>
-                                        <small class="fw-bold text-secondary">Criado aos: <span class="fw-normal">2024-06-15 - </span></small>
-                                        <small class="fw-bold text-secondary">Estado:</span> <span class="badge text-success border border-success">Aprovado</small>
-                                    </div>
-                                    <a href="#" class="btn btn-outline-primary btn-sm">Detalhes</a>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item">
-                        <div class="card border-0">
-                            <div class="card-body">
-                                <h5 class="card-title">#345 - Special title treatment</h5>
-                                <p class="card-text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsum repudiandae qui quisquam rem vitae illum delectus consectetur laudantium earum veniam. Quaerat excepturi rem natus itaque non beatae eligendi in similique..</p>
-                                <div class="d-flex justify-content-between border-top rounded p-2 bg-secondary bg-opacity-10">
-                                    <div>
-                                        <small class="fw-bold text-secondary">Criado por: <span class="fw-normal">John Doe - </span></small>
-                                        <small class="fw-bold text-secondary">Criado aos: <span class="fw-normal">2024-06-15 - </span></small>
-                                        <small class="fw-bold text-secondary">Estado:</span> <span class="badge text-success border border-success">Aprovado</small>
-                                    </div>
-                                    <a href="#" class="btn btn-outline-primary btn-sm">Detalhes</a>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item">
-                        <div class="card border-0">
-                            <div class="card-body">
-                                <h5 class="card-title">#345 - Special title treatment</h5>
-                                <p class="card-text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsum repudiandae qui quisquam rem vitae illum delectus consectetur laudantium earum veniam. Quaerat excepturi rem natus itaque non beatae eligendi in similique..</p>
-                                <div class="d-flex justify-content-between border-top rounded p-2 bg-secondary bg-opacity-10">
-                                    <div>
-                                        <small class="fw-bold text-secondary">Criado por: <span class="fw-normal">John Doe - </span></small>
-                                        <small class="fw-bold text-secondary">Criado aos: <span class="fw-normal">2024-06-15 - </span></small>
-                                        <small class="fw-bold text-secondary">Estado:</span> <span class="badge text-success border border-success">Aprovado</small>
-                                    </div>
-                                    <a href="#" class="btn btn-outline-primary btn-sm">Detalhes</a>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
+                        </li>
+                    {% endfor %}
                 </ul>
             </div>
         </div>

@@ -81,15 +81,15 @@
                 <!-- Estado, Versão e Nível de classificação -->
                 <div class="col-12 overflow-x-auto d-flex flex-row align-items-center gap-2">
                     <!-- Estado -->
-                    {% if norm.status == "draft" %}
+                    {% if norm.status == "vigente" %}
                         <span id="norm-status" class="badge bg-secondary rounded-5 text-white fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
-                    {% elif norm.status == "under_review" %}
+                    {% elif norm.status == "expirado" %}
                         <span id="norm-status" class="badge border border-warning rounded-5 text-warning fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
                     {% elif norm.status == "pending_approval" %}
                         <span class="badge border border-primary rounded-5 text-primary fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
                     {% elif norm.status == "approved" %}
                         <span class="badge border border-success rounded-5 text-success fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
-                    {% elif norm.status == "revoked" %}
+                    {% elif norm.status == "revogado" %}
                         <span class="badge border border-danger rounded-5 text-danger fw-semibold">Estado: <span class="fw-bold">{{norm.status}}</span></span>
                     {% endif %}
                     <!-- Versão actual -->
