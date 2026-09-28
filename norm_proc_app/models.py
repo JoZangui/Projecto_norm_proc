@@ -6,37 +6,38 @@ from users_app.models import Department
 
 class BaseDocument(models.Model):
     id = models.UUIDField(primary_key=True, default=generate_sequential_uuid, editable=False)
+    # Título do documento, não pode ser nulo ou em branco
     title = models.CharField(max_length=255)
-    # TipTap guarda o conteúdo como JSON estruturado
-    content = models.JSONField(default=dict, blank=True)  
+    # Descrição do documento, pode ser nula ou em branco
+    Description = models.TextField(blank=True, null=True, verbose_name="Descrição")  
+    # Status do documento, pode ser "vigente", "expirado" ou "revogado"
     status = models.CharField(max_length=50, choices=[
-        ('draft', 'Draft'),
-        ('under_review', 'Under Review'),
-        ('approved', 'Approved'),
-        ('pending_approval', 'Pending approval'),
-        ('revoked', 'Revoked'),
-    ], default='draft')
+        ('vigente', 'Vigente'),
+        ('expirado', 'Expirado'),
+        ('revogado', 'Revogado'),
+    ], default='vigente')
+    # Arquivo do documento, pode ser nulo ou em branco, será armazenado na pasta 'documents/'
     file = models.FileField(upload_to='documents/', null=True, blank=True)
     Classification_level = models.CharField(max_length=50, verbose_name="Nível de classificação", choices=[
-        ('public', 'Public'),
-        ('internal', 'Internal'),
-        ('confidential', 'Confidential'),
-    ], default='internal')
+        ('publico', 'Público'),
+        ('interno', 'Interno'),
+        ('confidencial', 'Confidencial'),
+    ], default='interno')
     created_at = models.DateTimeField(auto_now_add=True)
     published_at = models.DateTimeField(null=True, blank=True)
     revoked_at = models.DateTimeField(null=True, blank=True)
     current_version = models.CharField(max_length=10, default="1.0")
-    author = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="%(class)s_authored_documents")
-    drafted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="%(class)s_drafted_documents")
-    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True, related_name="%(class)s_reviewed_documents")
-    next_review_date = models.DateField(null=True, blank=True, verbose_name="Próxima revisão")
-    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True, related_name="%(class)s_approved_documents")
+    author = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="%(class)s_authored_documents") # Gabinete proveniente do documento
+    drafted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="%(class)s_drafted_documents") # Quem redigiu o documento
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True, related_name="%(class)s_reviewed_documents") #Quem revisou o documento
+    next_review_date = models.DateField(null=True, blank=True, verbose_name="Próxima revisão") # data da próxima revisão do documento
+    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True, related_name="%(class)s_approved_documents") # autoridade que aprovou o documento
     parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name="versions") # Permite criar uma relação de versão entre documentos
-    document_owner = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="%(class)s_owned_documents")
-    code = models.CharField(max_length=100, unique=True, blank=True, null=True, verbose_name="Código do documento")
+    document_owner = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="%(class)s_owned_documents") # Departamento proprietário do documento
+    code = models.CharField(max_length=100, unique=True, blank=True, null=True, verbose_name="Código do documento") # Código único do documento, pode ser gerado automaticamente ou definido manualmente
 
     class Meta:
-        abstract = True
+        abstract = True # Esta classe é abstrata, não será criada uma tabela no banco de dados para ela, mas sim para as classes que a herdam.
 
     def create_new_version(self, author, major=False):
         """
@@ -53,7 +54,7 @@ class BaseDocument(models.Model):
 
         return self.__class__.objects.create(
             title=self.title,
-            content=self.content,  # copia o JSON do TipTap
+            Description=self.Description,
             file=self.file,
             current_version=new_version,
             author=author,
@@ -63,7 +64,7 @@ class BaseDocument(models.Model):
 
 class Norms(BaseDocument):
     document_type = models.CharField(max_length=100, choices=[
-        ('policy', 'Policy'),
+        ('politica', 'Política'),
         ('regulation', 'Regulation'),
         ('technical_standard', 'Technical Standard'),
     ])
