@@ -31,7 +31,7 @@ class SubmitNormForReviewTests(TestCase):
             title="Norma de teste",
             document_type="policy",
             author=self.department,
-            responsible_department=self.department,
+            Recipient=self.department,
             document_owner=self.department,
             drafted_by=self.user,
         )

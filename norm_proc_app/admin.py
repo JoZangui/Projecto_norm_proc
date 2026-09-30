@@ -1,6 +1,5 @@
 # norm_proc_app/admin.py
 from django.contrib import admin
-from .models import Norms, Procedures
+from .models import BaseDocument
 
-admin.site.register(Norms)
-admin.site.register(Procedures)
+admin.site.register(BaseDocument)

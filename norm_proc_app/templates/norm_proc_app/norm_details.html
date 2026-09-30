@@ -64,7 +64,7 @@
                 </div>
                 <!-- criado por, data de criação e data de entrega -->
                 <div class="col-12 mb-2">
-                    <small class="text-secondary fw-semibold"><i class="bi bi-person"></i> Autor: {{norm.author}} / Responsável ({{norm.responsible_department}}) -</small>
+                    <small class="text-secondary fw-semibold"><i class="bi bi-person"></i> Autor: {{norm.author}} / Responsável ({{norm.Recipient}}) -</small>
                     <small class="text-secondary fw-semibold"><i class="bi bi-calendar2-week"></i> Em: {{norm.created_at|date:"d-m-Y, H:i:s"}} </small>
                     {% comment %}  
                         {% if norm.author != user %}

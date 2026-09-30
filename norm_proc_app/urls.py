@@ -9,16 +9,16 @@ urlpatterns = [
     path('', views.home, name='home'),
 
     # --------- Norms urls -------
-    # create norm
-    path('create_norm/', views.create_norm, name='create_norm'),
-    # norm details page
-    path('norm_details/<uuid:norm_id>/', views.norm_details, name='norm_details'),
+    # create document
+    path('create_document/', views.create_document, name='create_document'),
+    # document details page
+    path('document_details/<uuid:document_id>/', views.document_details, name='document_details'),
     # submit for review
-    path('norm_details/<uuid:norm_id>/submit-for-review/', views.submit_norm_for_review, name='submit_norm_for_review'),
+    path('document_details/<uuid:document_id>/submit-for-review/', views.submit_document_for_review, name='submit_document_for_review'),
     # submit for approval
-    path('norm_details/<uuid:norm_id>/submit-norm-for-approval/', views.submit_norm_for_approval, name='submit_norm_for_approval'),
+    path('document_details/<uuid:document_id>/submit-document-for-approval/', views.submit_document_for_approval, name='submit_document_for_approval'),
     # approve
-    path('norm_details/<uuid:norm_id>/approve-norm/', views.approve_norm, name='approve_norm'),
+    path('document_details/<uuid:document_id>/approve-document/', views.approve_document, name='approve_document'),
 
     # --------- Procedures urls -------
 

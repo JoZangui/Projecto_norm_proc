@@ -17,7 +17,7 @@ class BaseDocument(models.Model):
         ('revogado', 'Revogado'),
     ], default='vigente')
     # Arquivo do documento, pode ser nulo ou em branco, será armazenado na pasta 'documents/'
-    file = models.FileField(upload_to='documents/', null=True, blank=True)
+    file = models.FileField(upload_to='documents/', default='documents/default.pdf')
     Classification_level = models.CharField(max_length=50, verbose_name="Nível de classificação", choices=[
         ('publico', 'Público'),
         ('interno', 'Interno'),
@@ -25,7 +25,8 @@ class BaseDocument(models.Model):
         ('restrito', 'Restrito'),
     ], default='interno')
     created_at = models.DateTimeField(auto_now_add=True)
-    published_at = models.DateTimeField(null=True, blank=True)
+    published_at = models.DateTimeField(null=True, blank=True) # todo: Considerar se é necessário ter um campo de data de publicação
+    expired_at = models.DateTimeField(null=True, blank=True)
     revoked_at = models.DateTimeField(null=True, blank=True)
     current_version = models.CharField(max_length=10, default="1.0")
     author = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="%(class)s_authored_documents") # Gabinete proveniente do documento
@@ -35,10 +36,17 @@ class BaseDocument(models.Model):
     approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True, related_name="%(class)s_approved_documents") # autoridade que aprovou o documento
     parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name="versions") # Permite criar uma relação de versão entre documentos
     document_owner = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="%(class)s_owned_documents") # Departamento proprietário do documento
+    document_type = models.CharField(max_length=50, choices=[
+        ('norm', 'Norma'),
+        ('procedure', 'Procedimento'),
+        ('policy', 'Política'),
+        ('regulation', 'Regulamento'),
+        ('manual', 'Manual'),
+        ('guide', 'Guia'),
+        ('sop', ' Standard Operating Procedure'),
+    ], default='norm', verbose_name="Tipo de documento")
     code = models.CharField(max_length=100, unique=True, blank=True, null=True, verbose_name="Código do documento") # Código único do documento, pode ser gerado automaticamente ou definido manualmente
-
-    class Meta:
-        abstract = True # Esta classe é abstrata, não será criada uma tabela no banco de dados para ela, mas sim para as classes que a herdam.
+    Recipient = models.ForeignKey(Department, verbose_name="Destinatário", on_delete=models.CASCADE) # Destinatário do documento, pode ser nulo ou em branco
 
     def create_new_version(self, author, major=False):
         """
@@ -62,33 +70,3 @@ class BaseDocument(models.Model):
             parent=self,
             status="draft"
         )
-
-class Norms(BaseDocument):
-    document_type = models.CharField(max_length=100, choices=[
-        ('politica', 'Política'),
-        ('regulation', 'Regulation'),
-        ('technical_standard', 'Technical Standard'),
-    ])
-    responsible_department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="norms_responsible_documents")
-
-    def __str__(self):
-        return f"Norma: {self.title} (v{self.current_version})"
-
-    class Meta(BaseDocument.Meta):
-        verbose_name_plural = 'Normas'
-
-class Procedures(BaseDocument):
-    steps = models.JSONField(default=list)  # podes guardar steps como JSON do TipTap
-    estimated_duration = models.DurationField(null=True, blank=True)
-    criticality = models.CharField(max_length=50, choices=[
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('high', 'High'),
-    ])
-    operational_department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="procedures_operational_documents")
-
-    def __str__(self):
-        return f"Procedimento: {self.title} (v{self.current_version})"
-
-    class Meta(BaseDocument.Meta):
-        verbose_name_plural = "Procedimentos"

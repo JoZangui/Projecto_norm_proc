@@ -1,0 +1,6 @@
+{% for tipo, documentos_tipo in documents_by_type.items %}
+  <h2>{{ tipo }}</h2>
+  {% for document in documentos_tipo %}
+    <p>{{ document.title }}</p>
+  {% endfor %}
+{% endfor %}
