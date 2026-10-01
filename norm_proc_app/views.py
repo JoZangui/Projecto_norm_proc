@@ -25,7 +25,7 @@ def create_document(request):
     if request.method == 'POST':
         # Lógica para processar o formulário de criação de norma
         print(request.FILES)
-        
+
         norm_form = DocumentForm(request.POST, request.FILES)
         if norm_form.is_valid():
             # Salvar a nova norma
@@ -40,10 +40,10 @@ def create_document(request):
 
         logging.error(f"Norm form errors: {norm_form.errors}")
         messages.error(request, "There was an error creating the norm.")
-        return render(request, 'norm_proc_app/create_norm.html', {'form': norm_form})
+        return render(request, 'norm_proc_app/create_document.html', {'form': norm_form})
 
     norm_form = DocumentForm()
-    return render(request, 'norm_proc_app/create_norm.html', {'form': norm_form})
+    return render(request, 'norm_proc_app/create_document.html', {'form': norm_form})
 
 @login_required
 def update_document(request, document_id):

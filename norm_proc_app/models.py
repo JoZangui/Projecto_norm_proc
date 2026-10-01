@@ -9,11 +9,10 @@ class BaseDocument(models.Model):
     # Título do documento, não pode ser nulo ou em branco
     title = models.CharField(max_length=255)
     # Descrição do documento, pode ser nula ou em branco
-    Description = models.TextField(blank=True, null=True, verbose_name="Descrição")  
+    Description = models.TextField(blank=True, verbose_name="Descrição")  
     # Status do documento, pode ser "vigente", "expirado" ou "revogado"
     status = models.CharField(max_length=50, choices=[
         ('vigente', 'Vigente'),
-        ('expirado', 'Expirado'),
         ('revogado', 'Revogado'),
     ], default='vigente')
     # Arquivo do documento, pode ser nulo ou em branco, será armazenado na pasta 'documents/'
@@ -26,7 +25,6 @@ class BaseDocument(models.Model):
     ], default='interno')
     created_at = models.DateTimeField(auto_now_add=True)
     published_at = models.DateTimeField(null=True, blank=True) # todo: Considerar se é necessário ter um campo de data de publicação
-    expired_at = models.DateTimeField(null=True, blank=True)
     revoked_at = models.DateTimeField(null=True, blank=True)
     current_version = models.CharField(max_length=10, default="1.0")
     author = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="%(class)s_authored_documents") # Gabinete proveniente do documento
