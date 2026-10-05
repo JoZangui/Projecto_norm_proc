@@ -16,20 +16,16 @@ def home(request):
     return render(request, 'norm_proc_app/home.html', {'base_document': base_document})
 
 @login_required
-def create_procedure(request):
-    return HttpResponse("Create procedure page - to be implemented")
-
-@login_required
 def create_document(request):
     logging.basicConfig(level=logging.INFO)
     if request.method == 'POST':
         # Lógica para processar o formulário de criação de norma
         print(request.FILES)
 
-        norm_form = DocumentForm(request.POST, request.FILES)
-        if norm_form.is_valid():
+        document_form = DocumentForm(request.POST, request.FILES)
+        if document_form.is_valid():
             # Salvar a nova norma
-            new_norm = norm_form.save(commit=False)
+            new_norm = document_form.save(commit=False)
             new_norm.author = request.user
             new_norm.save()
             messages.success(request, "Document created successfully!")
@@ -38,16 +34,48 @@ def create_document(request):
                 kwargs={'document_id': new_norm.pk}
             ))
 
-        logging.error(f"Norm form errors: {norm_form.errors}")
+        logging.error(f"Norm form errors: {document_form.errors}")
         messages.error(request, "There was an error creating the norm.")
-        return render(request, 'norm_proc_app/create_document.html', {'form': norm_form})
+        return render(request, 'norm_proc_app/create_document.html', {'form': document_form})
 
-    norm_form = DocumentForm()
-    return render(request, 'norm_proc_app/create_document.html', {'form': norm_form})
+    document_form = DocumentForm()
+    return render(request, 'norm_proc_app/create_document.html', {'form': document_form})
+
+@login_required
+def create_document_new_version(request):
+    # TODO: Implementar a lógica para criar uma nova versão de um documento
+    # TODO: Rever em como implementar a função `create_new_version` do modelo `BaseDocument`.
+    logging.info("Creating a new version of a document - to be implemented")
+    if request.method == 'POST':
+        document_form = DocumentForm(request.POST, request.FILES)
+        if document_form.is_valid():
+            # Salvar a nova versão do documento
+            new_version = document_form.save(commit=False)
+            major_v, minor_v = map(int, new_version.current_version.split("."))
+
+            # TODO: Por trabalhar em como determinar se é uma nova versão maior ou menor, talvez com um campo no formulário.
+            if 'major' in request.POST:
+                major_v += 1
+                minor_v = 0
+            else:
+                minor_v += 1
+            new_version.current_version = f"{major_v}.{minor_v}"
+
+            new_version.author = request.user
+            new_version.save()
+            messages.success(request, "New version of the document created successfully!")
+            return HttpResponseRedirect(reverse(
+                'norm_proc_app:document_details',
+                kwargs={'document_id': new_version.pk}
+            ))
+        logging.error(f"Document form errors: {document_form.errors}")
+        messages.error(request, "There was an error creating the new version of the document.")
+    document_form = DocumentForm()
+    return render(request, 'norm_proc_app/create_document_new_version.html', {'form': document_form})
+
 
 @login_required
 def update_document(request, document_id):
-    # TODO: Rever em como implementar a função `create_new_version` do modelo `BaseDocument`.
     document = get_object_or_404(BaseDocument, id=document_id)
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES, instance=document)
@@ -82,56 +110,6 @@ def document_list(request):
 def document_details(request, document_id):
     document = get_object_or_404(BaseDocument, id=document_id)
     return render(request, 'norm_proc_app/document_details.html', {"document": document});
-
-@login_required
-@require_POST
-def submit_document_for_review(request, document_id):
-    document = get_object_or_404(BaseDocument, id=document_id)
-
-    if document.status != "draft":
-        return JsonResponse(
-            {"error": "O documento já não está em estado de rascunho."},
-            status=400,
-        )
-
-    document.status = "under_review"
-    document.save(update_fields=["status"])
-    return JsonResponse({"status": document.status})
-
-@login_required
-@require_POST
-def submit_document_for_approval(request, document_id):
-    document = get_object_or_404(BaseDocument, id=document_id)
-
-    if document.status != "under_review":
-        return JsonResponse(
-            {"error": "O documento não está em estado de revisão."},
-            status=400,
-        )
-
-    document.status = "pending_approval"
-    document.save(update_fields=["status"])
-    return JsonResponse({"status": document.status})
-
-
-@login_required
-@require_POST
-def approve_document(request, document_id):
-    document = get_object_or_404(BaseDocument, id=document_id)
-
-    if document.status != "pending_approval":
-        return JsonResponse(
-            {"error": "O documento não está em estado de aprovação."},
-            status=400,
-        )
-
-    document.status = "approved"
-    document.save(update_fields=["status"])
-    return JsonResponse({"status": document.status})
-
-@login_required
-def procedure_details(request, procedure_id):
-    return HttpResponse(f"Procedure details page for procedure_id: {procedure_id} - to be implemented")
 
 @login_required
 def viewer(request, id):

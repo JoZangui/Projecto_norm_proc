@@ -1,6 +1,7 @@
 # norm_proc_app/models.py
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from utils.identifiers import generate_sequential_uuid
 from users_app.models import Department
 
@@ -9,23 +10,23 @@ class BaseDocument(models.Model):
     # Título do documento, não pode ser nulo ou em branco
     title = models.CharField(max_length=255)
     # Descrição do documento, pode ser nula ou em branco
-    Description = models.TextField(blank=True, verbose_name="Descrição")  
-    # Status do documento, pode ser "vigente", "expirado" ou "revogado"
+    description = models.TextField(blank=True, verbose_name="Descrição")  
+    # Status do documento, pode ser "vigente" ou "revogado"
     status = models.CharField(max_length=50, choices=[
         ('vigente', 'Vigente'),
         ('revogado', 'Revogado'),
     ], default='vigente')
-    # Arquivo do documento, pode ser nulo ou em branco, será armazenado na pasta 'documents/'
-    file = models.FileField(upload_to='documents/', default='documents/default.pdf')
-    Classification_level = models.CharField(max_length=50, verbose_name="Nível de classificação", choices=[
+    # Arquivo do documento, será armazenado na pasta 'documents/'
+    file = models.FileField(upload_to='documents/', verbose_name="Arquivo do documento")
+    classification_level = models.CharField(max_length=50, verbose_name="Nível de classificação", choices=[
         ('publico', 'Público'),
         ('interno', 'Interno'),
         ('confidencial', 'Confidencial'),
         ('restrito', 'Restrito'),
     ], default='interno')
-    created_at = models.DateTimeField(auto_now_add=True)
-    published_at = models.DateTimeField(null=True, blank=True) # todo: Considerar se é necessário ter um campo de data de publicação
-    revoked_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(verbose_name="Data de criação") # Data e hora de criação do documento (A data em que o documento foi escrito)
+    published_at = models.DateTimeField(default=timezone.now, verbose_name="Data de publicação") # Data e hora de publicação do documento (A data em que o documento foi publicado no portal)
+    revoked_at = models.DateTimeField(null=True, blank=True, verbose_name="Data de revogação")
     current_version = models.CharField(max_length=10, default="1.0")
     author = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="%(class)s_authored_documents") # Gabinete proveniente do documento
     drafted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="%(class)s_drafted_documents") # Quem redigiu o documento
@@ -44,27 +45,5 @@ class BaseDocument(models.Model):
         ('sop', ' Standard Operating Procedure'),
     ], default='norm', verbose_name="Tipo de documento")
     code = models.CharField(max_length=100, unique=True, blank=True, null=True, verbose_name="Código do documento") # Código único do documento, pode ser gerado automaticamente ou definido manualmente
-    Recipient = models.ForeignKey(Department, verbose_name="Destinatário", on_delete=models.CASCADE) # Destinatário do documento, pode ser nulo ou em branco
+    recipient = models.ForeignKey(Department, verbose_name="Destinatário", on_delete=models.CASCADE) # Destinatário do documento, pode ser nulo ou em branco
 
-    def create_new_version(self, author, major=False):
-        """
-        Cria uma nova versão do documento.
-        Att: Isto é apenas para quando for actualizar uma versão existente não quando for criar um novo documento
-        """
-        major_v, minor_v = map(int, self.current_version.split("."))
-        if major:
-            major_v += 1
-            minor_v = 0
-        else:
-            minor_v += 1
-        new_version = f"{major_v}.{minor_v}"
-
-        return self.__class__.objects.create(
-            title=self.title,
-            Description=self.Description,
-            file=self.file,
-            current_version=new_version,
-            author=author,
-            parent=self,
-            status="draft"
-        )
