@@ -46,4 +46,3 @@ class BaseDocument(models.Model):
     ], default='norm', verbose_name="Tipo de documento")
     code = models.CharField(max_length=100, unique=True, blank=True, null=True, verbose_name="Código do documento") # Código único do documento, pode ser gerado automaticamente ou definido manualmente
     recipient = models.ForeignKey(Department, verbose_name="Destinatário", on_delete=models.CASCADE) # Destinatário do documento, pode ser nulo ou em branco
-
